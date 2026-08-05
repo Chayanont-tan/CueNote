@@ -1,3 +1,7 @@
 .env
 .env.local
 .vscode/
+
+app-flow-mockup-web.html
+app-flow-mockup.html
+mobile-test.html
