@@ -1,0 +1,32 @@
+meta {
+  name: Flashcards - get by id
+  type: http
+  seq: 6
+}
+
+docs {
+  Requires {{cardId}} — run "4-generate-flashcards" first.
+}
+
+get {
+  url: {{baseUrl}}/flashcards/{{cardId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+tests {
+  test("status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns the flashcard with sentences arrays", function () {
+    const body = res.getBody();
+    expect(body.success).to.equal(true);
+    expect(body.data.ai_suggested_sentences).to.be.an("array");
+    expect(body.data.sentences).to.be.an("array");
+  });
+}

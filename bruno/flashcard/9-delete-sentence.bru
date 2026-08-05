@@ -1,0 +1,29 @@
+meta {
+  name: Sentences - delete
+  type: http
+  seq: 9
+}
+
+docs {
+  Requires {{sentenceId}} — run "7-add-sentence" first.
+}
+
+delete {
+  url: {{baseUrl}}/sentences/{{sentenceId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+tests {
+  test("status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("success is true", function () {
+    expect(res.getBody().success).to.equal(true);
+  });
+}

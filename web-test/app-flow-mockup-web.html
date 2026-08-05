@@ -1,0 +1,2021 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CueNote · Web Flow Mockup (Cake-inspired)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Taviraj:ital,wght@0,400;0,500;0,600;0,700;1,500&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* ---- Warm editorial token system ---- */
+    --bg: #FAF6ED;
+    --page-bg: #FAF6ED;
+    --card-bg: #FFFFFF;
+
+    --ink: #221C33;
+    --sub: #8B8394;
+
+    --coral: #E6573C;
+    --coral-dark: #C1402A;
+    --coral-light: #FBE3DA;
+    --hero-pink: #FCE6D8;
+    --stat-gray: #CFC8D6;
+
+    --mint: #2C8C74;
+    --mint-dark: #1F6B58;
+    --mint-light: #DFF1E9;
+
+    --yellow: #EFB13C;
+    --yellow-dark: #C4890F;
+    --yellow-light: #FBEACB;
+
+    --violet: #6A5FEB;
+    --violet-light: #EBE8FE;
+
+    --border: #EBE1CE;
+    --line: #E8DCC4;
+
+    --chip-bg: var(--coral-light);
+    --chip-ink: var(--coral-dark);
+
+    --shadow-hard: 0 1px 2px rgba(34,28,51,0.05), 0 10px 24px rgba(34,28,51,0.07);
+    --shadow-hard-sm: 0 1px 2px rgba(34,28,51,0.05), 0 5px 12px rgba(34,28,51,0.06);
+    --shadow-pop: 0 12px 26px rgba(230,87,60,0.30);
+    --shadow-lift: 0 20px 40px rgba(34,26,51,0.12);
+
+    --r-lg: 26px;
+    --r-md: 18px;
+    --r-sm: 13px;
+
+    --f-display: 'Taviraj', 'Kanit', serif;
+    --f-body: 'IBM Plex Sans Thai', 'IBM Plex Sans', 'Kanit', sans-serif;
+
+    --sidebar-w: 272px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--f-body);
+    background:
+      radial-gradient(circle at 100% 0%, rgba(230,87,60,0.05), transparent 45%),
+      radial-gradient(circle at 0% 100%, rgba(44,140,116,0.05), transparent 45%),
+      var(--page-bg);
+    color: var(--ink);
+  }
+
+  button, input, textarea { font-family: var(--f-body); }
+
+  /* ================= App shell ================= */
+  .app-shell {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    width: var(--sidebar-w);
+    flex: 0 0 auto;
+    background: var(--card-bg);
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 20px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  .sidebar .brand {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 0 4px;
+    margin-bottom: 34px;
+  }
+  .sidebar .brand .mark {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--coral), #F08F6C);
+    border-radius: 15px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 21px;
+    box-shadow: var(--shadow-pop);
+    transform: rotate(-5deg);
+    flex: 0 0 auto;
+  }
+  .sidebar .brand .txt .name { font-family: var(--f-display); font-weight: 600; font-size: 19px; color: var(--ink); line-height: 1.1; letter-spacing: .2px; }
+  .sidebar .brand .txt .tag { font-size: 10.5px; color: var(--sub); font-weight: 500; margin-top: 3px; }
+
+  .sidebar nav { display: flex; flex-direction: column; gap: 3px; }
+  .sidebar .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 13px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--sub);
+    cursor: pointer;
+    border: none;
+    transition: background .15s ease, color .15s ease;
+  }
+  .sidebar .nav-item .icon {
+    width: 31px; height: 31px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex: 0 0 auto;
+    transition: background .15s ease;
+  }
+  .sidebar .nav-item:hover { background: var(--bg); color: var(--ink); }
+  .sidebar .nav-item.active { background: var(--ink); color: #fff; box-shadow: 0 8px 18px rgba(34,28,51,0.20); }
+  .sidebar .nav-item.active .icon { background: rgba(255,255,255,0.14); }
+
+  .sidebar .nav-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    color: var(--stat-gray);
+    margin: 22px 13px 8px;
+  }
+
+  .sidebar-spacer { flex: 1; }
+
+  .sidebar-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border-radius: 16px;
+    background: var(--bg);
+    border: none;
+    cursor: pointer;
+    transition: background .15s ease;
+  }
+  .sidebar-footer:hover { background: var(--coral-light); }
+  .sidebar-footer .avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--violet-light);
+    flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  .sidebar-footer .who .name { font-size: 12px; font-weight: 600; color: var(--ink); }
+  .sidebar-footer .who .email { font-size: 10.5px; color: var(--sub); font-weight: 400; }
+
+  /* ---------- Main / content ---------- */
+  .main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .app-body {
+    flex: 1;
+    position: relative;
+  }
+
+  .app-body .screen {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .app-body .screen.active { display: flex; }
+
+  .screen-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 34px 44px 20px;
+    position: sticky;
+    top: 0;
+    background: rgba(250,246,237,0.86);
+    backdrop-filter: blur(10px);
+    z-index: 5;
+  }
+  .screen-header h1 {
+    margin: 0;
+    font-family: var(--f-display);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: .2px;
+  }
+  .screen-header .sub {
+    margin: 5px 0 0;
+    font-size: 13px;
+    color: var(--sub);
+    font-weight: 400;
+  }
+  .back-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: var(--card-bg);
+    box-shadow: var(--shadow-hard-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    cursor: pointer;
+    flex: 0 0 auto;
+    transition: background .15s ease, color .15s ease, transform .15s ease;
+  }
+  .back-btn:hover { background: var(--coral-light); color: var(--coral-dark); transform: translateX(-2px); }
+
+  .screen-scroll {
+    flex: 1;
+    max-width: 1180px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 6px 44px 64px;
+  }
+
+  /* ---------- Global API status banner ---------- */
+  .api-status {
+    position: fixed;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: #fff;
+    padding: 11px 22px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 600;
+    display: none;
+    white-space: nowrap;
+    box-shadow: 0 14px 28px rgba(34,26,51,0.28);
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .api-status.show { display: block; }
+  .api-status.error { background: var(--coral-dark); }
+
+  /* ---------- Buttons / Inputs ---------- */
+  .btn-primary {
+    background: var(--coral);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 13px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(230,87,60,0.28);
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 26px rgba(230,87,60,0.34); background: var(--coral-dark); }
+  .btn-primary:active { transform: translateY(0); box-shadow: 0 6px 14px rgba(230,87,60,0.28); }
+  .btn-primary.block { width: 100%; }
+
+  .btn-secondary {
+    background: var(--chip-bg);
+    color: var(--chip-ink);
+    border: none;
+    border-radius: 14px;
+    padding: 12px 20px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .1s ease, filter .1s ease;
+  }
+  .btn-secondary:hover { filter: brightness(0.97); transform: translateY(-1px); }
+  .btn-secondary:active { transform: scale(0.98); }
+  .btn-secondary:disabled { opacity: 0.6; cursor: default; transform: none; }
+  .btn-secondary.block { width: 100%; }
+
+  input[type="text"], input[type="email"], input[type="password"], textarea {
+    width: 100%;
+    padding: 13px 15px;
+    border-radius: 14px;
+    border: 1.5px solid var(--border);
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    background: #fff;
+    font-weight: 400;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  input::placeholder, textarea::placeholder { color: #C7BFCE; }
+  input:focus, textarea:focus { border-color: var(--coral); box-shadow: 0 0 0 4px var(--coral-light); }
+  textarea { resize: vertical; min-height: 96px; }
+
+  .section-label {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 6px 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .empty-hint {
+    text-align: center;
+    color: var(--sub);
+    font-size: 13px;
+    font-weight: 400;
+    padding: 32px 18px;
+    grid-column: 1 / -1;
+    background: var(--card-bg);
+    border: 1.5px dashed var(--border);
+    border-radius: var(--r-md);
+  }
+
+  /* ================= Screen: Auth (full-page split) ================= */
+  #screen-auth {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    display: none;
+    background: var(--bg);
+  }
+  #screen-auth.active { display: flex; }
+  .auth-visual {
+    flex: 1.05;
+    min-width: 0;
+    background:
+      radial-gradient(circle at 15% 12%, rgba(239,177,60,0.30) 0%, rgba(239,177,60,0) 45%),
+      radial-gradient(circle at 88% 20%, rgba(230,87,60,0.28) 0%, rgba(230,87,60,0) 45%),
+      radial-gradient(circle at 85% 90%, rgba(44,140,116,0.30) 0%, rgba(44,140,116,0) 45%),
+      linear-gradient(165deg, #2B2140 0%, #1D1729 70%, #17121F 100%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 56px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .auth-visual .top .mark {
+    width: 58px; height: 58px;
+    background: linear-gradient(135deg, var(--coral), #F08F6C);
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 27px;
+    box-shadow: var(--shadow-pop);
+    transform: rotate(-5deg);
+    margin-bottom: 20px;
+  }
+  .auth-visual .top .brand-name { font-family: var(--f-display); font-size: 23px; font-weight: 600; letter-spacing: .2px; }
+  .auth-visual .headline {
+    font-family: var(--f-display);
+    font-size: 45px;
+    font-weight: 600;
+    line-height: 1.28;
+    max-width: 500px;
+    text-wrap: balance;
+  }
+  .auth-visual .headline .hl { color: var(--yellow); }
+  .auth-visual .lead {
+    margin-top: 16px;
+    font-size: 15px;
+    color: #C9C2DA;
+    font-weight: 400;
+    line-height: 1.75;
+    max-width: 440px;
+  }
+  .auth-visual .preview-cards {
+    display: flex;
+    gap: 14px;
+    margin-top: 40px;
+  }
+  .auth-preview-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 18px;
+    padding: 16px;
+    width: 154px;
+    backdrop-filter: blur(6px);
+  }
+  .auth-preview-card:nth-child(2) { margin-top: 14px; }
+  .auth-preview-card:nth-child(3) { margin-top: 28px; }
+  .auth-preview-card .w { font-family: var(--f-display); font-weight: 600; font-size: 16px; }
+  .auth-preview-card .m { font-size: 11px; color: #C9C2DA; margin-top: 5px; }
+  .auth-visual .foot { font-size: 11.5px; color: #9A93AC; font-weight: 400; }
+
+  .auth-form-side {
+    flex: 0 0 480px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background: var(--bg);
+    overflow-y: auto;
+  }
+  .auth-form-wrap { width: 100%; max-width: 360px; }
+  .auth-form-wrap h2 { font-family: var(--f-display); font-size: 29px; font-weight: 600; margin: 0 0 6px; color: var(--ink); }
+  .auth-form-wrap .sub { font-size: 13px; color: var(--sub); font-weight: 400; margin: 0 0 26px; }
+
+  .auth-tabs {
+    display: flex;
+    background: var(--bg);
+    border-radius: 14px;
+    padding: 5px;
+    margin-bottom: 22px;
+    border: 1px solid var(--border);
+  }
+  .auth-tabs button {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--sub);
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .auth-tabs button.active { background: var(--coral); color: #fff; box-shadow: 0 6px 14px rgba(230,87,60,0.3); }
+
+  .field { margin-bottom: 16px; }
+  .field label {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--sub);
+    margin-bottom: 7px;
+    letter-spacing: .4px;
+  }
+
+  /* ================= Screen: Home ================= */
+  .home-hero {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 26px;
+    background: linear-gradient(135deg, var(--hero-pink), #FBD6BC);
+    border-radius: var(--r-lg);
+    padding: 36px 40px;
+    margin-bottom: 30px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .home-hero .htext .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .6px; color: var(--coral-dark); text-transform: uppercase; }
+  .home-hero .htext h2 { font-family: var(--f-display); font-size: 30px; font-weight: 600; margin: 10px 0 10px; color: var(--ink); text-wrap: balance; }
+  .home-hero .htext p { font-size: 14px; color: #5D5468; font-weight: 400; line-height: 1.7; margin: 0; max-width: 400px; }
+  .home-hero .hart {
+    background: #fff;
+    border-radius: 22px;
+    height: 180px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 58px;
+    box-shadow: var(--shadow-hard);
+    position: relative;
+  }
+  .home-hero .hart .spark { position: absolute; top: 18px; right: 22px; font-size: 24px; }
+
+  .tag-input-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 34px;
+    max-width: 600px;
+  }
+  .tag-input-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 0 18px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .tag-input-wrap:focus-within { border-color: var(--coral); box-shadow: 0 0 0 4px var(--coral-light); }
+  .tag-input-wrap .tag-input-icon { font-size: 14px; flex: 0 0 auto; }
+  .tag-input-wrap input { border: none; padding: 14px 0; font-weight: 600; }
+  .tag-input-wrap input:focus { border: none; box-shadow: none; }
+  .tag-input-bar button {
+    flex: 0 0 auto;
+    width: 60px;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s ease, transform .15s ease;
+  }
+  .tag-input-bar button:hover { background: #362A50; transform: translateY(-2px); }
+
+  .home-section { margin-bottom: 38px; }
+
+  .carousel {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  .carousel::-webkit-scrollbar { height: 6px; }
+  .carousel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .mini-card {
+    flex: 0 0 auto;
+    width: 150px;
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 15px;
+    box-shadow: var(--shadow-hard-sm);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .mini-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
+  .mini-card .w { font-family: var(--f-display); font-size: 16px; font-weight: 600; color: var(--ink); }
+  .mini-card .m { font-size: 11.5px; color: var(--sub); margin-top: 5px; font-weight: 400; }
+
+  .shadow-shortcut {
+    flex: 0 0 auto;
+    width: 220px;
+    background: var(--mint-light);
+    border: 1.5px solid var(--mint);
+    border-radius: var(--r-lg);
+    padding: 18px;
+    cursor: pointer;
+    box-shadow: var(--shadow-hard-sm);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .shadow-shortcut:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
+  .shadow-shortcut .sc-title { font-size: 13px; font-weight: 700; color: var(--ink); line-height: 1.45; }
+  .shadow-shortcut .sc-tag { font-size: 12.5px; color: var(--mint-dark); margin-top: 10px; font-weight: 600; }
+  .shadow-shortcut .sc-play { font-size: 12.5px; font-weight: 600; color: var(--mint-dark); margin-top: 7px; }
+
+  .tag-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 18px;
+  }
+  .tag-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 18px;
+    cursor: pointer;
+    box-shadow: var(--shadow-hard);
+    position: relative;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .tag-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); border-color: var(--coral); }
+  .tag-card:active { transform: translateY(-1px); }
+  .tag-card .tag-top-row { display: flex; align-items: flex-start; justify-content: space-between; }
+  .tag-card .emoji-badge {
+    font-size: 21px;
+    width: 42px; height: 42px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 13px;
+    background: var(--tag-color-light, var(--coral-light));
+  }
+  .tag-card .name { font-family: var(--f-display); font-size: 16.5px; font-weight: 600; color: var(--ink); margin-top: 12px; }
+  .tag-card .count { font-size: 11.5px; color: var(--stat-gray); margin-top: 4px; font-weight: 700; }
+  .progress-ring {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .progress-ring .slice { font-size: 13px; position: relative; z-index: 1; }
+  .tag-card.skeleton { cursor: default; }
+  .tag-card.skeleton .shimmer {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #F1E6D8 25%, #FBF3E6 37%, #F1E6D8 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.2s ease-in-out infinite;
+    margin-top: 10px;
+  }
+  @keyframes shimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+  }
+
+  /* ================= Screen: All Cards ================= */
+  .catalog-summary {
+    display: flex;
+    gap: 44px;
+    background: linear-gradient(135deg, var(--ink), #2E2545);
+    color: #fff;
+    border-radius: var(--r-lg);
+    padding: 26px 34px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-hard);
+  }
+  .catalog-summary .stat { text-align: left; }
+  .catalog-summary .num { font-family: var(--f-display); font-size: 32px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .catalog-summary .lbl { font-size: 10.5px; color: #C9C2DA; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; margin-top: 4px; }
+
+  .catalog-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 18px;
+  }
+  .catalog-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 18px;
+    cursor: pointer;
+    transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+  }
+  .catalog-row:hover { border-color: var(--coral); transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+  .catalog-row .icon-circle {
+    width: 50px; height: 50px;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 23px;
+    flex: 0 0 auto;
+  }
+  .catalog-row .info { flex: 1; min-width: 0; }
+  .catalog-row .info .name { font-family: var(--f-display); font-size: 15.5px; font-weight: 600; color: var(--ink); }
+  .catalog-row .info .meta { font-size: 11.5px; color: var(--sub); margin-top: 5px; font-weight: 400; }
+  .catalog-row .chevron { font-size: 20px; color: var(--sub); font-weight: 700; flex: 0 0 auto; }
+
+  /* ================= Screen: Vocab list (two-column) ================= */
+  .vocab-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 36px;
+    align-items: start;
+  }
+  .vocab-side {
+    position: sticky;
+    top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .vocab-side .side-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--stat-gray); margin: 0 0 8px 4px; }
+  .level-chips { display: flex; flex-direction: column; gap: 8px; }
+  .chip {
+    padding: 11px 16px;
+    border-radius: 13px;
+    background: var(--card-bg);
+    color: var(--ink);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    text-align: left;
+    transition: border-color .15s ease, background .15s ease, color .15s ease;
+  }
+  .chip:hover { border-color: var(--coral); }
+  .chip.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+  .vocab-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+    align-content: start;
+  }
+  .vocab-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 18px;
+    box-shadow: var(--shadow-hard);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .vocab-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
+  .vocab-card.has-sentence { border-color: var(--mint); }
+  .vocab-card .top-row { display: flex; align-items: center; justify-content: space-between; }
+  .vocab-card .word-block { display: flex; align-items: baseline; gap: 9px; }
+  .vocab-card .word { font-family: var(--f-display); font-size: 20px; font-weight: 600; color: var(--ink); }
+  .vocab-card .pos {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    color: var(--violet); background: var(--violet-light);
+    padding: 4px 9px; border-radius: 999px;
+  }
+  .level-badge { font-size: 10px; font-weight: 700; color: #fff; padding: 4px 10px; border-radius: 999px; }
+  .lvl-A1, .lvl-A2 { background: var(--mint); }
+  .lvl-B1, .lvl-B2 { background: var(--yellow-dark); }
+  .lvl-C1, .lvl-C2 { background: var(--coral-dark); }
+  .vocab-card .meaning { font-size: 13.5px; color: var(--sub); margin-top: 7px; font-weight: 400; }
+  .vocab-card .edit-btn {
+    margin-top: 14px;
+    width: 100%;
+    background: var(--chip-bg);
+    color: var(--chip-ink);
+    border: none;
+    border-radius: 13px;
+    padding: 11px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter .1s ease, transform .1s ease;
+  }
+  .vocab-card .edit-btn:hover { filter: brightness(0.97); transform: translateY(-1px); }
+  .vocab-card.has-sentence .edit-btn { background: var(--mint-light); color: var(--mint-dark); }
+
+  .add-words-card {
+    grid-column: 1 / -1;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--r-md);
+    padding: 22px;
+    text-align: center;
+  }
+
+  /* ================= Screen: Sentence editor (two-column) ================= */
+  .editor-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 36px;
+    align-items: start;
+  }
+  .editor-left { position: sticky; top: 4px; }
+  .word-display {
+    background: linear-gradient(135deg, var(--ink), #2E2545);
+    border-radius: var(--r-lg);
+    padding: 26px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-hard);
+  }
+  .word-display::after {
+    content: "✍️";
+    position: absolute;
+    right: 16px; top: 16px;
+    font-size: 30px;
+    opacity: 0.5;
+  }
+  .word-display .word { font-family: var(--f-display); font-size: 30px; font-weight: 600; color: #fff; }
+  .word-display .def { font-size: 13.5px; color: #C9C2DA; margin-top: 8px; font-weight: 400; }
+  .editor-hint {
+    margin-top: 18px;
+    font-size: 12px;
+    color: var(--sub);
+    font-weight: 400;
+    line-height: 1.7;
+    background: var(--card-bg);
+    border: 1.5px dashed var(--border);
+    border-radius: var(--r-sm);
+    padding: 16px;
+  }
+
+  .sentence-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 13px 15px;
+    font-size: 13.5px;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 10px;
+    transition: border-color .15s ease;
+  }
+  .sentence-item:hover { border-color: var(--coral); }
+  .sentence-item .num {
+    font-size: 10px; font-weight: 700; color: var(--coral-dark);
+    background: var(--coral-light); border-radius: 999px; padding: 4px 9px; flex: 0 0 auto;
+  }
+  .sentence-item .text { flex: 1; }
+  .sentence-item .del { flex: 0 0 auto; border: none; background: transparent; color: var(--sub); font-size: 16px; cursor: pointer; padding: 0 3px; }
+  .sentence-item .del:hover { color: var(--coral-dark); }
+
+  .ai-sentence-option {
+    background: var(--violet-light);
+    border: 1.5px solid var(--violet);
+    border-radius: var(--r-sm);
+    padding: 13px 15px;
+    font-size: 13.5px;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: filter .1s ease, transform .1s ease;
+  }
+  .ai-sentence-option:hover { filter: brightness(0.98); transform: translateY(-1px); }
+  .ai-sentence-option.added { border-color: var(--mint-dark); background: var(--mint-light); color: var(--mint-dark); cursor: default; transform: none; }
+
+  .editor-actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+  .editor-actions .btn-secondary, .editor-actions textarea { width: auto; }
+
+  .toast {
+    position: fixed;
+    bottom: 34px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: #fff;
+    padding: 13px 24px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    z-index: 550;
+    white-space: nowrap;
+    box-shadow: var(--shadow-lift);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ================= Screen: Shadowing hub ================= */
+  .mic-hero {
+    background: linear-gradient(135deg, var(--mint), var(--mint-dark));
+    background-image: radial-gradient(circle at 100% 0%, rgba(255,255,255,0.2), rgba(255,255,255,0) 55%), linear-gradient(135deg, var(--mint), var(--mint-dark));
+    color: #fff;
+    border-radius: var(--r-lg);
+    padding: 30px 36px;
+    margin-bottom: 30px;
+    box-shadow: 0 16px 32px rgba(44,140,116,0.30);
+    position: relative;
+    overflow: hidden;
+  }
+  .mic-hero::after {
+    content: "🎙️";
+    position: absolute;
+    right: 20px; bottom: -24px;
+    font-size: 100px;
+    opacity: 0.16;
+    transform: rotate(-8deg);
+  }
+  .mic-hero h3 { margin: 0 0 8px; font-family: var(--f-display); font-size: 22px; font-weight: 600; }
+  .mic-hero p { margin: 0; font-size: 13.5px; opacity: 0.96; line-height: 1.65; font-weight: 400; max-width: 540px; }
+
+  .mic-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 18px;
+  }
+  .mic-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 18px;
+    cursor: pointer;
+    box-shadow: var(--shadow-hard-sm);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .mic-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); border-color: var(--mint); }
+  .mic-card .top { display: flex; align-items: center; gap: 12px; }
+  .mic-card .icon-circle {
+    width: 48px; height: 48px; border-radius: 15px; background: var(--mint-light);
+    display: flex; align-items: center; justify-content: center; font-size: 22px; flex: 0 0 auto;
+  }
+  .mic-card .name { font-family: var(--f-display); font-weight: 600; font-size: 15px; color: var(--ink); }
+  .mic-card .count { font-size: 11.5px; color: var(--sub); font-weight: 400; margin-top: 3px; }
+  .mic-card .scenario-pills { display: flex; gap: 8px; margin-top: 17px; }
+  .scenario-pill { flex: 1; text-align: center; padding: 10px 5px; border-radius: 11px; font-size: 10.5px; font-weight: 700; line-height: 1.4; transition: transform .12s ease; }
+  .scenario-pill.locked { background: var(--bg); color: var(--sub); }
+  .scenario-pill.pending { background: var(--yellow-light); color: var(--yellow-dark); cursor: pointer; }
+  .scenario-pill.ready { background: var(--mint-light); color: var(--mint-dark); cursor: pointer; }
+  .scenario-pill.pending:hover, .scenario-pill.ready:hover { transform: translateY(-2px); }
+  .scenario-pill .n { display: block; font-size: 12.5px; margin-bottom: 2px; }
+
+  /* ================= Screen: Scenario list ================= */
+  .scenario-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 20px;
+  }
+  .scenario-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 20px;
+    position: relative;
+    box-shadow: var(--shadow-hard);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .scenario-card:not(.locked):hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
+  .scenario-card .title { font-family: var(--f-display); font-size: 17px; font-weight: 600; color: var(--ink); }
+  .scenario-card .meta { display: flex; gap: 9px; margin-top: 12px; flex-wrap: wrap; }
+  .scenario-card .tag-badge, .scenario-card .status-badge {
+    font-size: 10.5px; font-weight: 700; background: var(--chip-bg); color: var(--chip-ink);
+    padding: 4px 10px; border-radius: 999px;
+  }
+  .scenario-card .status-badge { background: var(--mint-light); color: var(--mint-dark); }
+  .scenario-card.locked { opacity: 0.6; }
+  .scenario-card.locked .status-badge { background: var(--bg); color: var(--sub); }
+  .scenario-card .lock-note { font-size: 11.5px; color: var(--sub); margin-top: 12px; font-weight: 400; }
+  .scenario-card .start-btn {
+    margin-top: 15px; width: 100%; background: var(--mint); color: #fff; border: none;
+    border-radius: 13px; padding: 12px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 8px 16px rgba(44,140,116,0.3);
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .scenario-card .start-btn:hover:not(:disabled) { transform: translateY(-2px); }
+  .scenario-card .start-btn.create { background: var(--chip-bg); color: var(--chip-ink); box-shadow: none; }
+  .scenario-card.locked .start-btn { background: var(--bg); color: var(--sub); cursor: not-allowed; box-shadow: none; }
+
+  /* ================= Screen: Shadowing practice ================= */
+  .chat-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 0 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 740px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .chat-bubble-row { display: flex; align-items: flex-end; gap: 11px; padding: 0 44px; }
+  .chat-bubble-row.ai { justify-content: flex-start; }
+  .chat-bubble-row.user { justify-content: flex-end; flex-direction: row-reverse; }
+  .chat-avatar {
+    width: 34px; height: 34px; border-radius: 50%; flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
+    background: var(--yellow-light); border: 1.5px solid var(--border);
+  }
+  .chat-bubble-row.user .chat-avatar { background: var(--coral-light); }
+  .chat-bubble {
+    max-width: 74%; padding: 14px 17px; border-radius: 20px; font-size: 14px; line-height: 1.65;
+    background: #fff; border: 1.5px solid var(--border); color: var(--ink); font-weight: 400;
+    transition: all 0.2s ease; box-shadow: var(--shadow-hard-sm);
+  }
+  .chat-bubble-row.user .chat-bubble { background: var(--coral); color: #fff; border-color: var(--coral-dark); }
+  .chat-bubble .th { display: none; font-size: 11.5px; color: var(--sub); margin-top: 7px; font-weight: 400; }
+  .chat-bubble-row.user .chat-bubble .th { color: rgba(255,255,255,0.85); }
+  .chat-bubble .target { font-weight: 700; color: var(--coral-dark); }
+  .chat-bubble-row.user .chat-bubble .target { color: var(--yellow); }
+  .chat-bubble-row.active .chat-bubble { border-color: var(--yellow-dark); box-shadow: 0 0 0 5px var(--yellow-light); }
+
+  .practice-controls {
+    flex: 0 0 auto;
+    border-top: 1.5px solid var(--line);
+    background: var(--bg);
+    padding: 18px 44px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 740px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .ctrl-btn {
+    border: 1.5px solid var(--border);
+    background: var(--card-bg);
+    color: var(--ink);
+    border-radius: 13px;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .ctrl-btn:hover { border-color: var(--coral); transform: translateY(-1px); }
+  .ctrl-btn.play { background: var(--coral); color: #fff; border-color: var(--coral-dark); flex: 1; box-shadow: 0 8px 18px rgba(230,87,60,0.3); }
+  .ctrl-btn.toggled { background: var(--yellow); color: var(--ink); border-color: var(--yellow-dark); }
+
+  /* ================= Screen: Settings ================= */
+  .settings-wrap { max-width: 580px; }
+  .settings-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--card-bg); border: 1.5px solid var(--border); border-radius: var(--r-sm);
+    padding: 17px 19px; margin-bottom: 13px; font-size: 13.5px; font-weight: 600; color: var(--ink);
+    cursor: pointer; transition: border-color .15s ease, transform .15s ease;
+  }
+  .settings-row:hover { border-color: var(--coral); transform: translateX(2px); }
+  .settings-row .sub { font-size: 11.5px; color: var(--sub); font-weight: 400; margin-top: 4px; }
+  .settings-row span { color: var(--sub); font-weight: 700; }
+
+  /* ---------- Responsive: collapse sidebar to icon rail ---------- */
+  @media (max-width: 980px) {
+    :root { --sidebar-w: 84px; }
+    .sidebar { padding: 22px 14px; align-items: center; }
+    .sidebar .brand .txt, .sidebar .nav-item span:not(.icon), .sidebar-footer .who, .sidebar .nav-section-label { display: none; }
+    .sidebar .brand { justify-content: center; padding: 0; }
+    .sidebar .nav-item { justify-content: center; padding: 11px; }
+    .sidebar-footer { justify-content: center; padding: 8px; }
+    .vocab-layout, .editor-grid { grid-template-columns: 1fr; }
+    .vocab-side, .editor-left { position: static; }
+    .level-chips { flex-direction: row; flex-wrap: wrap; }
+    .auth-visual { display: none; }
+    .auth-form-side { flex: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell" id="appShell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">📝</div>
+      <div class="txt">
+        <div class="name">CueNote</div>
+        <div class="tag">เก่งอังกฤษเพื่อภารกิจเฉพาะหน้า</div>
+      </div>
+    </div>
+    <nav>
+      <div class="nav-item" data-nav="home"><span class="icon">🏠</span><span>Home</span></div>
+      <div class="nav-item" data-nav="all-cards"><span class="icon">🏷️</span><span>All Cards</span></div>
+      <div class="nav-item" data-nav="shadowing"><span class="icon">🎙️</span><span>Shadowing</span></div>
+      <div class="nav-item" data-nav="settings"><span class="icon">⚙️</span><span>Settings</span></div>
+    </nav>
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-footer" data-nav="settings">
+      <div class="avatar">🙂</div>
+      <div class="who">
+        <div class="name">Tester</div>
+        <div class="email">tester@cuenote.app</div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="api-status" id="apiStatus"></div>
+
+    <div class="app-body" id="appBody">
+
+      <!-- Home -->
+      <section class="screen" id="screen-home">
+        <div class="screen-header">
+          <div>
+            <h1>สวัสดี 👋</h1>
+            <p class="sub">จัดการ Tag คำศัพท์ และฝึก Shadowing ของคุณ</p>
+          </div>
+        </div>
+        <div class="screen-scroll">
+          <div class="home-hero">
+            <div class="htext">
+              <div class="eyebrow">เริ่มต้นที่นี่</div>
+              <h2>เพิ่ม Tag ใหม่ แล้วให้ AI ช่วยเจนคำศัพท์ให้ทันที</h2>
+              <p>พิมพ์หัวข้อหรือสถานการณ์ที่อยากเก่ง เช่น "ร้านกาแฟ" หรือ "สัมภาษณ์งาน" ระบบจะช่วยสร้างคำศัพท์และประโยคตัวอย่างให้อัตโนมัติ</p>
+            </div>
+            <div class="hart">🏷️<span class="spark">✨</span></div>
+          </div>
+
+          <div class="tag-input-bar">
+            <div class="tag-input-wrap">
+              <span class="tag-input-icon">🏷️</span>
+              <input type="text" id="tagInput" placeholder="พิมชื่อ tag ที่คุณต้องการ ..." />
+            </div>
+            <button id="tagSubmit">➤</button>
+          </div>
+
+          <div class="home-section">
+            <div class="section-label">พร้อมฝึก Shadowing</div>
+            <div class="carousel" id="shadowingShortcuts"></div>
+          </div>
+
+          <div class="home-section">
+            <div class="section-label">Tag ทั้งหมด</div>
+            <div class="tag-grid" id="tagGrid"></div>
+          </div>
+
+          <div class="home-section">
+            <div class="section-label">🕓 การ์ดล่าสุด</div>
+            <div class="carousel" id="recentCarousel"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- All Cards -->
+      <section class="screen" id="screen-all-cards">
+        <div class="screen-header">
+          <div>
+            <h1>🏷️ All Cards</h1>
+            <p class="sub">คลังรวม Tag และการ์ดคำศัพท์ทั้งหมด</p>
+          </div>
+        </div>
+        <div class="screen-scroll">
+          <div id="allCardsGrid"></div>
+        </div>
+      </section>
+
+      <!-- Vocab List -->
+      <section class="screen" id="screen-vocab-list">
+        <div class="screen-header">
+          <div class="back-btn" data-nav="home">‹</div>
+          <div>
+            <h1 id="vocabTagTitle">☕ ร้านกาแฟ</h1>
+            <p class="sub" id="vocabTagStats">0 คำ</p>
+          </div>
+        </div>
+        <div class="screen-scroll">
+          <div class="vocab-layout">
+            <div class="vocab-side">
+              <div class="side-label">ระดับความยาก</div>
+              <div class="level-chips" id="levelChips"></div>
+            </div>
+            <div class="vocab-grid" id="vocabList"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sentence Editor -->
+      <section class="screen" id="screen-sentence-editor">
+        <div class="screen-header">
+          <div class="back-btn" data-nav="vocab-list">‹</div>
+          <div>
+            <h1>แต่งประโยค ✍️</h1>
+            <p class="sub">แต่งได้หลายประโยคต่อคำ ไม่จำกัดแค่ 1 ประโยค</p>
+          </div>
+        </div>
+        <div class="screen-scroll">
+          <div class="editor-grid">
+            <div class="editor-left">
+              <div class="word-display">
+                <div class="word" id="editorWord">coffee</div>
+                <div class="def" id="editorDef">(noun) กาแฟ</div>
+              </div>
+              <div class="editor-hint">เคล็ดลับ: ลองแต่งประโยคเองก่อน แล้วค่อยกด AI Generate เพื่อดูตัวอย่างเพิ่มเติม เปรียบเทียบสไตล์การใช้คำได้ทันที</div>
+            </div>
+            <div class="editor-right">
+              <div class="section-label">ประโยคที่แต่งไว้แล้ว</div>
+              <div id="sentenceList" style="margin-bottom:20px;"></div>
+
+              <label style="font-size:11px;font-weight:700;color:var(--sub);display:block;margin-bottom:6px;">เพิ่มประโยคใหม่</label>
+              <textarea id="userSentence" placeholder="พิมพ์ประโยคโดยใช้คำนี้..."></textarea>
+
+              <div class="editor-actions">
+                <button class="btn-secondary" id="addSentenceBtn">+ เพิ่มประโยค</button>
+                <button class="btn-secondary" id="aiGenBtn">✨ AI Generate 3 Sentences</button>
+              </div>
+              <div id="aiSentenceOptions" style="margin-top:14px;"></div>
+
+              <button class="btn-primary" id="doneEditingBtn" style="margin-top:22px;">✓ เสร็จสิ้น กลับไปหน้าคำศัพท์</button>
+            </div>
+          </div>
+        </div>
+        <div class="toast" id="toast">Saved Successfully</div>
+      </section>
+
+      <!-- Shadowing Hub -->
+      <section class="screen" id="screen-shadowing-hub">
+        <div class="screen-header">
+          <div>
+            <h1>🎙️ Shadowing</h1>
+            <p class="sub">เลือก Tag ที่เคยสร้างไว้ เพื่อฝึกพูดตามสถานการณ์</p>
+          </div>
+        </div>
+        <div class="screen-scroll">
+          <div id="shadowingTagGrid"></div>
+        </div>
+      </section>
+
+      <!-- Scenario list for one tag -->
+      <section class="screen" id="screen-shadowing-scenario-list">
+        <div class="screen-header">
+          <div class="back-btn" data-nav="shadowing">‹</div>
+          <div>
+            <h1 id="scenarioListTitle">☕ ร้านกาแฟ</h1>
+            <p class="sub" id="scenarioListStats">5 คำ</p>
+          </div>
+        </div>
+        <div class="screen-scroll">
+          <div class="scenario-grid" id="scenarioGrid"></div>
+        </div>
+      </section>
+
+      <!-- Shadowing Practice -->
+      <section class="screen" id="screen-shadowing-practice">
+        <div class="screen-header">
+          <div class="back-btn" id="practiceBackBtn">‹</div>
+          <div>
+            <h1 id="practiceTitle">สถานการณ์ 1</h1>
+          </div>
+        </div>
+        <div class="chat-container" id="chatContainer"></div>
+        <div class="practice-controls">
+          <button class="ctrl-btn play" id="playBtn">▶ Play</button>
+          <button class="ctrl-btn" id="speedBtn">x1.0</button>
+          <button class="ctrl-btn" id="translateBtn">แปล</button>
+          <button class="ctrl-btn" id="replayBtn">↻</button>
+        </div>
+      </section>
+
+      <!-- Settings -->
+      <section class="screen" id="screen-settings">
+        <div class="screen-header">
+          <div>
+            <h1>⚙️ ตั้งค่า</h1>
+          </div>
+        </div>
+        <div class="screen-scroll">
+          <div class="settings-wrap">
+            <div class="settings-row">
+              <div>บัญชีผู้ใช้<div class="sub">demo@cuenote.app</div></div>
+              <span>›</span>
+            </div>
+            <div class="settings-row">
+              <div>ระดับภาษาเริ่มต้น<div class="sub">A1 - B1</div></div>
+              <span>›</span>
+            </div>
+            <div class="settings-row">
+              <div>ความเร็วเสียงอ่านเริ่มต้น<div class="sub">x1.0</div></div>
+              <span>›</span>
+            </div>
+            <div class="settings-row">
+              <div>ออกจากระบบ</div>
+              <span>›</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- Auth (full-page split screen, overlays app-shell until logged in) -->
+<section class="screen active" id="screen-auth">
+  <div class="auth-visual">
+    <div class="top">
+      <div class="mark">📝</div>
+      <div class="brand-name">CueNote</div>
+    </div>
+    <div class="mid">
+      <div class="headline">เก่งอังกฤษเพื่อ<span class="hl">ภารกิจเฉพาะหน้า</span> ไม่ใช่แค่สอบ</div>
+      <p class="lead">สร้าง Tag ตามสถานการณ์จริงที่คุณต้องเจอ ให้ AI ช่วยเจนคำศัพท์ แต่งประโยค แล้วฝึกพูดตามด้วย Shadowing จนคล่อง</p>
+      <div class="preview-cards">
+        <div class="auth-preview-card"><div class="w">coffee</div><div class="m">(noun) กาแฟ</div></div>
+        <div class="auth-preview-card"><div class="w">receipt</div><div class="m">(noun) ใบเสร็จ</div></div>
+        <div class="auth-preview-card"><div class="w">refund</div><div class="m">(verb) คืนเงิน</div></div>
+      </div>
+    </div>
+    <div class="foot">© CueNote · Web flow mockup</div>
+  </div>
+
+  <div class="auth-form-side">
+    <div class="auth-form-wrap">
+      <h2>ยินดีต้อนรับกลับ</h2>
+      <p class="sub">เข้าสู่ระบบเพื่อเริ่มฝึกภาษาอังกฤษของคุณ</p>
+      <div class="auth-tabs">
+        <button class="active" data-auth="login">Login</button>
+        <button data-auth="register">Register</button>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="authEmail" placeholder="you@email.com" value="tester@cuenote.app" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="authPassword" placeholder="••••••••" value="correcthorse123" />
+      </div>
+      <div class="field" id="confirmPasswordField" style="display:none;">
+        <label>Confirm Password</label>
+        <input type="password" id="authConfirmPassword" placeholder="••••••••" value="correcthorse123" />
+      </div>
+      <button class="btn-primary block" id="authSubmit" style="margin-top:6px;">Login</button>
+      <details style="margin-top:16px;">
+        <summary style="font-size:11px;color:var(--sub);cursor:pointer;">⚙️ API base URL</summary>
+        <div class="field" style="margin-top:8px;">
+          <input type="text" id="apiBaseInput" value="http://localhost:8080/api/v1" />
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<script>
+  // ---------- API config & helpers ----------
+  const API = {
+    base: localStorage.getItem('cuenote_mock_api_base') || 'http://localhost:8080/api/v1',
+    token: localStorage.getItem('cuenote_mock_token') || null,
+  };
+  function setApiBase(v) { API.base = v; localStorage.setItem('cuenote_mock_api_base', v); }
+  function setToken(t) { API.token = t; localStorage.setItem('cuenote_mock_token', t); }
+  document.getElementById('apiBaseInput').value = API.base;
+
+  let statusHideTimer = null;
+  function showStatus(msg, isError) {
+    const el = document.getElementById('apiStatus');
+    el.textContent = msg;
+    el.classList.add('show');
+    el.classList.toggle('error', !!isError);
+    clearTimeout(statusHideTimer);
+    if (isError) statusHideTimer = setTimeout(hideStatus, 3500);
+  }
+  function hideStatus() {
+    document.getElementById('apiStatus').classList.remove('show', 'error');
+  }
+
+  async function apiFetch(path, options = {}) {
+    const headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
+    if (API.token) headers['Authorization'] = `Bearer ${API.token}`;
+    const res = await fetch(`${API.base}${path}`, Object.assign({}, options, { headers }));
+    let body = null;
+    try { body = await res.json(); } catch (e) {}
+    if (!res.ok || !body || body.success === false) {
+      throw new Error((body && body.message) || `Request failed (${res.status})`);
+    }
+    return body.data;
+  }
+
+  const apiListTags = (limit) => apiFetch(`/tags${limit ? `?limit=${limit}` : ''}`);
+  const apiGetTag = (tagId) => apiFetch(`/tags/${tagId}`);
+  const apiCreateTag = (name) => apiFetch('/tags', { method: 'POST', body: JSON.stringify({ name }) });
+  const apiGenerateFlashcards = (tagId, limit) => apiFetch(`/tags/${tagId}/flashcards/generate`, { method: 'POST', body: JSON.stringify({ limit }) });
+  const apiListFlashcards = (tagId) => apiFetch(`/tags/${tagId}/flashcards`);
+  const apiGetFlashcard = (cardId) => apiFetch(`/flashcards/${cardId}`);
+  const apiAddSentence = (cardId, text) => apiFetch(`/flashcards/${cardId}/sentences`, { method: 'POST', body: JSON.stringify({ sentence_text: text }) });
+  const apiGenerateSentences = (cardId) => apiFetch(`/flashcards/${cardId}/sentences/generate`, { method: 'POST' });
+  const apiDeleteSentence = (sentenceId) => apiFetch(`/sentences/${sentenceId}`, { method: 'DELETE' });
+
+  // ---------- Local-only bits (Shadowing has no backend yet) ----------
+  const TAG_EMOJI = { 'ร้านกาแฟ': '☕', 'ขายของงานอีเว้นท์': '🎪', default: '🏷️' };
+  function tagEmoji(name) { return TAG_EMOJI[name] || TAG_EMOJI.default; }
+
+  const TAG_COLORS = [
+    { light: 'var(--coral-light)', ink: 'var(--coral-dark)' },
+    { light: 'var(--mint-light)', ink: 'var(--mint-dark)' },
+    { light: 'var(--yellow-light)', ink: 'var(--yellow-dark)' },
+    { light: 'var(--violet-light)', ink: 'var(--violet)' },
+  ];
+  function tagColorFor(index) { return TAG_COLORS[index % TAG_COLORS.length]; }
+
+  const SCENARIO_TITLES = [
+    'สถานการณ์ 1: บทสนทนาเบื้องต้น',
+    'สถานการณ์ 2: รับมือสถานการณ์ไม่คาดคิด',
+    'สถานการณ์ 3: บทสนทนาขั้นสูง',
+  ];
+
+  function scenarioUnlockThreshold(n) { return [5, 10, 15][n - 1]; }
+  function unlockedCountFor(tag) { return [1, 2, 3].filter((n) => tag.unlocked_words >= scenarioUnlockThreshold(n)).length; }
+
+  const state = {
+    tags: [],
+    currentTagId: null,
+    currentCardId: null,
+    currentCard: null,
+    lastGeneratedTagId: null,
+    activeLevelFilter: 'All',
+    currentScenarioTagId: null,
+    mockScenarios: {}, // tagId -> {1:{created,loading},2:...,3:...} — client-only, no Shadowing backend yet
+    practiceBackTarget: 'shadowing-scenario-list',
+    practice: { playing: false, index: 0, speed: 1.0, translate: false, timer: null },
+  };
+
+  function getMockScenarios(tagId) {
+    if (!state.mockScenarios[tagId]) {
+      state.mockScenarios[tagId] = { 1: { created: false, loading: false }, 2: { created: false, loading: false }, 3: { created: false, loading: false } };
+    }
+    return state.mockScenarios[tagId];
+  }
+
+  // ---------- Navigation ----------
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+
+    document.querySelectorAll('.sidebar .nav-item').forEach((t) => t.classList.remove('active'));
+    if (id === 'home') document.querySelector('.sidebar [data-nav="home"]')?.classList.add('active');
+    if (id === 'all-cards') document.querySelector('.sidebar [data-nav="all-cards"]')?.classList.add('active');
+    if (id === 'shadowing-hub' || id === 'shadowing-scenario-list' || id === 'shadowing-practice') document.querySelector('.sidebar [data-nav="shadowing"]')?.classList.add('active');
+    if (id === 'settings') document.querySelector('.sidebar [data-nav="settings"]')?.classList.add('active');
+  }
+
+  document.querySelectorAll('[data-nav]').forEach((el) => {
+    el.addEventListener('click', async () => {
+      const target = el.dataset.nav;
+      if (target === 'home') { showScreen('home'); await renderHome(); }
+      else if (target === 'all-cards') { showScreen('all-cards'); await renderAllCards(); }
+      else if (target === 'shadowing') { showScreen('shadowing-hub'); await renderShadowingHub(); }
+      else if (target === 'settings') showScreen('settings');
+      else if (target === 'vocab-list') { showScreen('vocab-list'); await renderVocabList(); }
+    });
+  });
+
+  // ---------- Auth ----------
+  document.getElementById('apiBaseInput').addEventListener('change', (e) => {
+    setApiBase(e.target.value.trim().replace(/\/$/, ''));
+  });
+
+  document.querySelectorAll('[data-auth]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-auth]').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const isRegister = btn.dataset.auth === 'register';
+      document.getElementById('confirmPasswordField').style.display = isRegister ? 'block' : 'none';
+      document.getElementById('authSubmit').textContent = isRegister ? 'Register' : 'Login';
+    });
+  });
+
+  document.getElementById('authSubmit').addEventListener('click', async () => {
+    const isRegister = document.querySelector('[data-auth].active').dataset.auth === 'register';
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+
+    if (isRegister && password !== document.getElementById('authConfirmPassword').value) {
+      showStatus('รหัสผ่านไม่ตรงกัน', true);
+      return;
+    }
+
+    showStatus(isRegister ? 'กำลังสมัครสมาชิก...' : 'กำลังเข้าสู่ระบบ...');
+    try {
+      const data = await apiFetch(isRegister ? '/auth/register' : '/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+      setToken(data.access_token);
+      hideStatus();
+      showScreen('home');
+      await renderHome();
+    } catch (err) {
+      showStatus(err.message, true);
+    }
+  });
+
+  // ---------- Shared: Tag card grid ----------
+  function tagCardHTML(tag, index) {
+    const unlockedCount = unlockedCountFor(tag);
+    const color = tagColorFor(index);
+    const pct = Math.round((unlockedCount / 3) * 360);
+    return `<div class="tag-card" data-tag-id="${tag.id}">
+      <div class="tag-top-row">
+        <div class="emoji-badge" style="background:${color.light}">${tagEmoji(tag.name)}</div>
+        <div class="progress-ring" style="background:conic-gradient(${color.ink} ${pct}deg, var(--border) ${pct}deg)">
+          <div style="width:24px;height:24px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;">
+            <span class="slice">🍰</span>
+          </div>
+        </div>
+      </div>
+      <div class="name">${tag.name}</div>
+      <div class="count">${tag.unlocked_words} คำ · ${unlockedCount}/3 ปลดล็อก</div>
+    </div>`;
+  }
+
+  function skeletonTagCardHTML() {
+    return `<div class="tag-card skeleton">
+      <div class="emoji-badge">⏳</div>
+      <div class="shimmer" style="width:70%"></div>
+      <div class="shimmer" style="width:40%"></div>
+    </div>`;
+  }
+
+  function renderTagGrid(containerEl, tags, onTagClick, pendingCount) {
+    pendingCount = pendingCount || 0;
+    if (tags.length === 0 && pendingCount === 0) {
+      containerEl.innerHTML = '<div class="empty-hint">ยังไม่มี Tag — ลองพิมพ์ชื่อ Tag ด้านบนแล้วกด Submit ก่อน 🍰</div>';
+      return;
+    }
+    const skeletons = Array.from({ length: pendingCount }, skeletonTagCardHTML).join('');
+    containerEl.innerHTML = tags.map((t, i) => tagCardHTML(t, i)).join('') + skeletons;
+    containerEl.querySelectorAll('.tag-card[data-tag-id]').forEach((card) => {
+      card.addEventListener('click', () => onTagClick(Number(card.dataset.tagId)));
+    });
+  }
+
+  // ---------- Home ----------
+  let pendingTagCount = 0;
+
+  async function renderHome() {
+    try {
+      state.tags = await apiListTags(10);
+    } catch (err) {
+      showStatus(err.message, true);
+      state.tags = [];
+    }
+
+    renderTagGrid(document.getElementById('tagGrid'), state.tags, async (tagId) => {
+      state.currentTagId = tagId;
+      showScreen('vocab-list');
+      await renderVocabList();
+    }, pendingTagCount);
+
+    const carousel = document.getElementById('recentCarousel');
+    const recentTagId = state.lastGeneratedTagId && state.tags.some((t) => t.id === state.lastGeneratedTagId)
+      ? state.lastGeneratedTagId
+      : (state.tags[0] && state.tags[0].id);
+    if (!recentTagId) {
+      carousel.innerHTML = '<div class="empty-hint">ยังไม่มีการ์ดล่าสุด</div>';
+    } else {
+      try {
+        const cards = await apiListFlashcards(recentTagId);
+        carousel.innerHTML = cards.slice(0, 6).map((c) => `
+          <div class="mini-card">
+            <div class="w">${c.word}</div>
+            <div class="m">${c.meaning_th}</div>
+          </div>
+        `).join('') || '<div class="empty-hint">ยังไม่มีการ์ดล่าสุด</div>';
+      } catch (err) {
+        carousel.innerHTML = '<div class="empty-hint">โหลดการ์ดล่าสุดไม่สำเร็จ</div>';
+      }
+    }
+
+    renderShadowingShortcuts();
+  }
+
+  function renderShadowingShortcuts() {
+    const el = document.getElementById('shadowingShortcuts');
+    const ready = [];
+    state.tags.forEach((tag) => {
+      const scenarios = getMockScenarios(tag.id);
+      [1, 2, 3].forEach((n) => {
+        const unlocked = tag.unlocked_words >= scenarioUnlockThreshold(n);
+        if (unlocked && scenarios[n].created) ready.push({ tag, scenarioNum: n });
+      });
+    });
+
+    if (ready.length === 0) {
+      el.innerHTML = '<div class="empty-hint">ยังไม่มี Shadowing พร้อมฝึก — แต่งประโยคแล้วไปสร้างสถานการณ์ในแท็บ 🎙️ Shadowing</div>';
+      return;
+    }
+
+    el.innerHTML = ready.map(({ tag, scenarioNum }) => `
+      <div class="shadow-shortcut" data-tag-id="${tag.id}" data-scenario="${scenarioNum}">
+        <div class="sc-title">${SCENARIO_TITLES[scenarioNum - 1]}</div>
+        <div class="sc-tag">${tagEmoji(tag.name)} ${tag.name}</div>
+        <div class="sc-play">▶ เริ่มฝึกเลย</div>
+      </div>
+    `).join('');
+
+    el.querySelectorAll('.shadow-shortcut').forEach((card) => {
+      card.addEventListener('click', () => {
+        state.practiceBackTarget = 'home';
+        openPractice(Number(card.dataset.tagId), Number(card.dataset.scenario));
+      });
+    });
+  }
+
+  document.getElementById('tagSubmit').addEventListener('click', async () => {
+    const input = document.getElementById('tagInput');
+    const name = input.value.trim();
+    if (!name) return;
+    input.value = '';
+
+    pendingTagCount++;
+    renderTagGrid(document.getElementById('tagGrid'), state.tags, async (tagId) => {
+      state.currentTagId = tagId;
+      showScreen('vocab-list');
+      await renderVocabList();
+    }, pendingTagCount);
+
+    showStatus('กำลังสร้าง Tag และให้ AI เจนคำศัพท์...');
+    try {
+      const tag = await apiCreateTag(name);
+      await apiGenerateFlashcards(tag.id, 5);
+      state.lastGeneratedTagId = tag.id;
+      hideStatus();
+    } catch (err) {
+      showStatus(err.message, true);
+    } finally {
+      pendingTagCount = Math.max(0, pendingTagCount - 1);
+      await renderHome();
+    }
+  });
+
+  // ---------- All Cards (catalog list) ----------
+  async function renderAllCards() {
+    const container = document.getElementById('allCardsGrid');
+    try {
+      state.tags = await apiListTags();
+    } catch (err) {
+      showStatus(err.message, true);
+      state.tags = [];
+    }
+    const tags = state.tags;
+
+    if (tags.length === 0) {
+      container.innerHTML = '<div class="empty-hint">ยังไม่มี Tag — ลองไปสร้างที่หน้า Home ก่อน 🍰</div>';
+      return;
+    }
+
+    const totalWords = tags.reduce((sum, t) => sum + t.total_words, 0);
+    const totalUnlocked = tags.reduce((sum, t) => sum + unlockedCountFor(t), 0);
+
+    const summaryHTML = `<div class="catalog-summary">
+      <div class="stat"><div class="num">${tags.length}</div><div class="lbl">Tags</div></div>
+      <div class="stat"><div class="num">${totalWords}</div><div class="lbl">Words</div></div>
+      <div class="stat"><div class="num">${totalUnlocked}/${tags.length * 3}</div><div class="lbl">Scenarios</div></div>
+    </div>`;
+
+    const rowsHTML = tags.map((tag, i) => {
+      const color = tagColorFor(i);
+      const unlockedCount = unlockedCountFor(tag);
+      return `<div class="catalog-row" data-tag-id="${tag.id}">
+        <div class="icon-circle" style="background:${color.light}">${tagEmoji(tag.name)}</div>
+        <div class="info">
+          <div class="name">${tag.name}</div>
+          <div class="meta">${tag.unlocked_words} คำ · ${unlockedCount}/3 สถานการณ์ปลดล็อก</div>
+        </div>
+        <div class="chevron">›</div>
+      </div>`;
+    }).join('');
+
+    container.innerHTML = summaryHTML + `<div class="catalog-list">${rowsHTML}</div>`;
+
+    container.querySelectorAll('.catalog-row[data-tag-id]').forEach((row) => {
+      row.addEventListener('click', async () => {
+        state.currentTagId = Number(row.dataset.tagId);
+        showScreen('vocab-list');
+        await renderVocabList();
+      });
+    });
+  }
+
+  // ---------- Vocab List ----------
+  async function renderVocabList() {
+    const tagId = state.currentTagId;
+    let tag = state.tags.find((t) => t.id === tagId);
+    if (!tag) {
+      try { tag = await apiGetTag(tagId); } catch (err) { showStatus(err.message, true); return; }
+    }
+    document.getElementById('vocabTagTitle').textContent = `${tagEmoji(tag.name)} ${tag.name}`;
+    document.getElementById('vocabTagStats').textContent = `${tag.unlocked_words} คำ`;
+
+    let cards = [];
+    try {
+      cards = await apiListFlashcards(tagId);
+    } catch (err) {
+      showStatus(err.message, true);
+    }
+
+    const levels = ['All', ...new Set(cards.map((c) => c.level))];
+    document.getElementById('levelChips').innerHTML = levels.map((lvl) => `
+      <button class="chip ${lvl === state.activeLevelFilter ? 'active' : ''}" data-level="${lvl}">${lvl}</button>
+    `).join('');
+    document.querySelectorAll('#levelChips .chip').forEach((chip) => {
+      chip.addEventListener('click', async () => {
+        state.activeLevelFilter = chip.dataset.level;
+        await renderVocabList();
+      });
+    });
+
+    const filtered = state.activeLevelFilter === 'All'
+      ? cards
+      : cards.filter((c) => c.level === state.activeLevelFilter);
+
+    const cardsHTML = filtered.map((c) => `
+      <div class="vocab-card ${c.sentences.length ? 'has-sentence' : ''}">
+        <div class="top-row">
+          <div class="word-block">
+            <span class="word">${c.word}</span>
+            <span class="pos">${c.part_of_speech}</span>
+          </div>
+          <span class="level-badge lvl-${c.level}">${c.level}</span>
+        </div>
+        <div class="meaning">${c.meaning_th}</div>
+        <button class="edit-btn" data-card-id="${c.id}">
+          ${c.sentences.length ? `✓ ${c.sentences.length} ประโยค — แก้ไข` : '+ Create / Edit Sentence'}
+        </button>
+      </div>
+    `).join('');
+
+    document.getElementById('vocabList').innerHTML = cardsHTML + `
+      <div class="add-words-card">
+        <button class="btn-secondary" id="addWordsBtn">+ เพิ่มคำศัพท์ (AI เจนเพิ่ม 5 คำ)</button>
+      </div>
+    `;
+
+    document.querySelectorAll('#vocabList [data-card-id]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        state.currentCardId = btn.dataset.cardId;
+        showScreen('sentence-editor');
+        await renderSentenceEditor();
+      });
+    });
+
+    document.getElementById('addWordsBtn').addEventListener('click', async (e) => {
+      e.target.disabled = true;
+      e.target.textContent = 'กำลังเจนคำศัพท์เพิ่ม...';
+      try {
+        await apiGenerateFlashcards(tagId, 5);
+      } catch (err) {
+        showStatus(err.message, true);
+      }
+      await renderVocabList();
+    });
+  }
+
+  // ---------- Sentence Editor ----------
+  function renderSentenceList() {
+    const c = state.currentCard;
+    const listEl = document.getElementById('sentenceList');
+    if (!c.sentences || c.sentences.length === 0) {
+      listEl.innerHTML = '<div class="empty-hint" style="padding:18px 12px;">ยังไม่มีประโยค — ลองพิมพ์เองหรือกด AI Generate ด้านล่าง</div>';
+      return;
+    }
+    listEl.innerHTML = c.sentences.map((s, i) => `
+      <div class="sentence-item">
+        <span class="num">${i + 1}</span>
+        <span class="text">${s.sentence_text}</span>
+        <button class="del" data-sentence-id="${s.id}">✕</button>
+      </div>
+    `).join('');
+    listEl.querySelectorAll('[data-sentence-id]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        try {
+          await apiDeleteSentence(Number(btn.dataset.sentenceId));
+          state.currentCard = await apiGetFlashcard(state.currentCardId);
+          renderSentenceList();
+        } catch (err) {
+          showStatus(err.message, true);
+        }
+      });
+    });
+  }
+
+  async function renderSentenceEditor() {
+    try {
+      state.currentCard = await apiGetFlashcard(state.currentCardId);
+    } catch (err) {
+      showStatus(err.message, true);
+      return;
+    }
+    const c = state.currentCard;
+    document.getElementById('editorWord').textContent = c.word;
+    document.getElementById('editorDef').textContent = `(${c.part_of_speech}) ${c.meaning_th}`;
+    document.getElementById('userSentence').value = '';
+    document.getElementById('aiSentenceOptions').innerHTML = '';
+    renderSentenceList();
+  }
+
+  document.getElementById('addSentenceBtn').addEventListener('click', async () => {
+    const textarea = document.getElementById('userSentence');
+    const text = textarea.value.trim();
+    if (!text) return;
+    try {
+      await apiAddSentence(state.currentCardId, text);
+      textarea.value = '';
+      state.currentCard = await apiGetFlashcard(state.currentCardId);
+      renderSentenceList();
+    } catch (err) {
+      showStatus(err.message, true);
+    }
+  });
+
+  document.getElementById('aiGenBtn').addEventListener('click', async (e) => {
+    e.target.disabled = true;
+    e.target.textContent = 'กำลังเจน...';
+    try {
+      const result = await apiGenerateSentences(state.currentCardId);
+      document.getElementById('aiSentenceOptions').innerHTML = result.sentences.map((s, i) => `
+        <div class="ai-sentence-option" data-option-index="${i}">${s}</div>
+      `).join('');
+      document.querySelectorAll('.ai-sentence-option').forEach((el) => {
+        el.addEventListener('click', async () => {
+          if (el.classList.contains('added')) return;
+          try {
+            await apiAddSentence(state.currentCardId, el.textContent);
+            el.classList.add('added');
+            el.textContent = '✓ ' + el.textContent;
+            state.currentCard = await apiGetFlashcard(state.currentCardId);
+            renderSentenceList();
+          } catch (err) {
+            showStatus(err.message, true);
+          }
+        });
+      });
+    } catch (err) {
+      showStatus(err.message, true);
+    } finally {
+      e.target.disabled = false;
+      e.target.textContent = '✨ AI Generate 3 Sentences';
+    }
+  });
+
+  document.getElementById('doneEditingBtn').addEventListener('click', () => {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(async () => {
+      toast.classList.remove('show');
+      showScreen('vocab-list');
+      await renderVocabList();
+    }, 500);
+  });
+
+  // ---------- Shadowing Hub (mic list) — client-only, no backend yet ----------
+  async function renderShadowingHub() {
+    const container = document.getElementById('shadowingTagGrid');
+    try {
+      state.tags = await apiListTags();
+    } catch (err) {
+      showStatus(err.message, true);
+      state.tags = [];
+    }
+    const tags = state.tags;
+
+    const readyCount = tags.reduce((sum, tag) => {
+      const scenarios = getMockScenarios(tag.id);
+      return sum + [1, 2, 3].filter((n) => tag.unlocked_words >= scenarioUnlockThreshold(n) && scenarios[n].created).length;
+    }, 0);
+
+    const heroHTML = `<div class="mic-hero">
+      <h3>ฝึกพูดกับสถานการณ์จริง</h3>
+      <p>เลือก Tag ด้านล่าง แล้วปลดล็อกสถานการณ์ Shadowing ทีละขั้น ตอนนี้พร้อมฝึกแล้ว ${readyCount} สถานการณ์</p>
+    </div>`;
+
+    if (tags.length === 0) {
+      container.innerHTML = heroHTML + '<div class="empty-hint">ยังไม่มี Tag พร้อมใช้งาน — ไปสร้างที่หน้า Home ก่อนนะ 🍰</div>';
+      return;
+    }
+
+    const cardsHTML = tags.map((tag) => {
+      const scenarios = getMockScenarios(tag.id);
+      const pillsHTML = [1, 2, 3].map((n) => {
+        const threshold = scenarioUnlockThreshold(n);
+        const unlocked = tag.unlocked_words >= threshold;
+        const created = scenarios[n].created;
+        let cls = 'locked', label = `🔒<span class="n">#${n}</span>`;
+        if (unlocked && created) { cls = 'ready'; label = `🎙️<span class="n">#${n}</span>`; }
+        else if (unlocked && !created) { cls = 'pending'; label = `✨<span class="n">#${n}</span>`; }
+        return `<div class="scenario-pill ${cls}" data-tag-id="${tag.id}" data-scenario="${n}">${label}</div>`;
+      }).join('');
+
+      return `<div class="mic-card" data-tag-id="${tag.id}">
+        <div class="top">
+          <div class="icon-circle">${tagEmoji(tag.name)}</div>
+          <div>
+            <div class="name">${tag.name}</div>
+            <div class="count">${tag.unlocked_words} คำสะสม</div>
+          </div>
+        </div>
+        <div class="scenario-pills">${pillsHTML}</div>
+      </div>`;
+    }).join('');
+
+    container.innerHTML = heroHTML + `<div class="mic-list">${cardsHTML}</div>`;
+
+    container.querySelectorAll('.mic-card').forEach((card) => {
+      card.addEventListener('click', async (e) => {
+        if (e.target.closest('.scenario-pill')) return;
+        state.currentScenarioTagId = Number(card.dataset.tagId);
+        showScreen('shadowing-scenario-list');
+        await renderScenarioList();
+      });
+    });
+
+    container.querySelectorAll('.scenario-pill').forEach((pill) => {
+      pill.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const tagId = Number(pill.dataset.tagId);
+        const n = Number(pill.dataset.scenario);
+        const tag = state.tags.find((t) => t.id === tagId);
+        if (tag.unlocked_words < scenarioUnlockThreshold(n)) return;
+        state.currentScenarioTagId = tagId;
+        if (getMockScenarios(tagId)[n].created) {
+          state.practiceBackTarget = 'shadowing-scenario-list';
+          openPractice(tagId, n);
+        } else {
+          showScreen('shadowing-scenario-list');
+          await renderScenarioList();
+        }
+      });
+    });
+  }
+
+  // ---------- Scenario list for one tag (client-only) ----------
+  async function renderScenarioList() {
+    const tagId = state.currentScenarioTagId;
+    let tag = state.tags.find((t) => t.id === tagId);
+    if (!tag) {
+      try { tag = await apiGetTag(tagId); } catch (err) { showStatus(err.message, true); return; }
+    }
+    const scenarios = getMockScenarios(tagId);
+    document.getElementById('scenarioListTitle').textContent = `${tagEmoji(tag.name)} ${tag.name}`;
+    document.getElementById('scenarioListStats').textContent = `${tag.unlocked_words} คำ`;
+
+    document.getElementById('scenarioGrid').innerHTML = SCENARIO_TITLES.map((title, i) => {
+      const scenarioNum = i + 1;
+      const threshold = scenarioUnlockThreshold(scenarioNum);
+      const unlocked = tag.unlocked_words >= threshold;
+      const scenarioState = scenarios[scenarioNum];
+
+      let actionHTML;
+      if (!unlocked) {
+        actionHTML = `<div class="lock-note">ปลดล็อกเมื่อสะสมคำศัพท์ครบ ${threshold} คำ (ตอนนี้ ${tag.unlocked_words}/${threshold})</div>
+          <button class="start-btn" disabled>🔒 Locked</button>`;
+      } else if (scenarioState.loading) {
+        actionHTML = `<button class="start-btn create" disabled>กำลังสร้างสถานการณ์...</button>`;
+      } else if (!scenarioState.created) {
+        actionHTML = `<button class="start-btn create" data-create="${scenarioNum}">+ สร้างสถานการณ์ (AI Generate)</button>`;
+      } else {
+        actionHTML = `<button class="start-btn" data-start="${scenarioNum}">▶ Start Practice</button>`;
+      }
+
+      return `<div class="scenario-card ${unlocked ? '' : 'locked'}">
+        <div class="title">${title}</div>
+        <div class="meta">
+          <span class="tag-badge">${tagEmoji(tag.name)} ${tag.name}</span>
+          <span class="status-badge">${scenarioState.created ? 'Read-Along Ready' : (unlocked ? 'Not Created Yet' : 'Locked')}</span>
+        </div>
+        ${actionHTML}
+      </div>`;
+    }).join('');
+
+
+    document.querySelectorAll('#scenarioGrid [data-create]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const n = Number(btn.dataset.create);
+        scenarios[n].loading = true;
+        renderScenarioList();
+        setTimeout(() => {
+          scenarios[n].loading = false;
+          scenarios[n].created = true;
+          renderScenarioList();
+        }, 1200);
+
+      });
+    });
+
+    document.querySelectorAll('#scenarioGrid [data-start]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.practiceBackTarget = 'shadowing-scenario-list';
+        openPractice(tagId, Number(btn.dataset.start));
+      });
+    });
+  }
+
+  // ---------- Shadowing Practice (client-only mock dialogue) ----------
+  function buildScript(tag) {
+    return [
+      { speaker: 'ai', avatar: tagEmoji(tag.name), en: `Hi! Welcome to ${tag.name}. What can I get for you today?`, th: 'สวัสดีค่ะ ยินดีต้อนรับ วันนี้รับอะไรดีคะ' },
+      { speaker: 'user', avatar: '🙂', en: `I'd like to try something related to <span class="target">${tag.name}</span>, please.`, th: `ขอลองอะไรที่เกี่ยวกับ${tag.name}หน่อยค่ะ` },
+      { speaker: 'ai', avatar: tagEmoji(tag.name), en: 'Sure! Would you like anything else with that?', th: 'ได้ค่ะ ต้องการอย่างอื่นเพิ่มไหมคะ' },
+      { speaker: 'user', avatar: '🙂', en: 'No, that will be all. Thank you!', th: 'ไม่ค่ะ แค่นี้พอ ขอบคุณค่ะ' },
+    ];
+  }
+
+  function openPractice(tagId, scenarioNum) {
+    const tag = state.tags.find((t) => t.id === tagId);
+    if (!tag) return;
+    document.getElementById('practiceTitle').textContent = SCENARIO_TITLES[scenarioNum - 1];
+    state.practice.script = buildScript(tag);
+    state.practice.index = 0;
+    state.practice.playing = false;
+    renderChat();
+    showScreen('shadowing-practice');
+  }
+
+  document.getElementById('practiceBackBtn').addEventListener('click', async () => {
+    clearInterval(state.practice.timer);
+    if (state.practiceBackTarget === 'home') { showScreen('home'); await renderHome(); }
+    else { showScreen('shadowing-scenario-list'); await renderScenarioList(); }
+  });
+
+  function renderChat() {
+    const container = document.getElementById('chatContainer');
+    container.innerHTML = state.practice.script.map((line, i) => `
+      <div class="chat-bubble-row ${line.speaker} ${i === state.practice.index ? 'active' : ''}" data-line="${i}">
+        <div class="chat-avatar">${line.avatar || (line.speaker === 'ai' ? '🤖' : '🙂')}</div>
+        <div class="chat-bubble">
+          <div class="en">${line.en}</div>
+          <div class="th" style="display:${state.practice.translate ? 'block' : 'none'}">${line.th}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('playBtn').addEventListener('click', () => {
+    const p = state.practice;
+    p.playing = !p.playing;
+    document.getElementById('playBtn').textContent = p.playing ? '⏸ Pause' : '▶ Play';
+
+    if (p.playing) {
+      p.timer = setInterval(() => {
+        p.index++;
+        if (p.index >= p.script.length) {
+          clearInterval(p.timer);
+          p.playing = false;
+          document.getElementById('playBtn').textContent = '▶ Play';
+          p.index = p.script.length - 1;
+          return;
+        }
+        renderChat();
+        const activeEl = document.querySelector('.chat-bubble-row.active');
+        activeEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 1800 / p.speed);
+    } else {
+      clearInterval(p.timer);
+    }
+  });
+
+  document.getElementById('speedBtn').addEventListener('click', () => {
+    const p = state.practice;
+    p.speed = p.speed === 1.0 ? 0.8 : 1.0;
+    document.getElementById('speedBtn').textContent = `x${p.speed.toFixed(1)}`;
+  });
+
+  document.getElementById('translateBtn').addEventListener('click', (e) => {
+    state.practice.translate = !state.practice.translate;
+    e.target.classList.toggle('toggled', state.practice.translate);
+    renderChat();
+  });
+
+  document.getElementById('replayBtn').addEventListener('click', () => {
+    clearInterval(state.practice.timer);
+    state.practice.index = 0;
+    state.practice.playing = false;
+    document.getElementById('playBtn').textContent = '▶ Play';
+    renderChat();
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+meta {
+  name: Tags - no token (401)
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/tags
+  body: none
+  auth: none
+}
+
+tests {
+  test("status is 401", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+
+  test("success is false", function () {
+    expect(res.getBody().success).to.equal(false);
+  });
+}

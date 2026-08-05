@@ -1,0 +1,45 @@
+meta {
+  name: Tags - create
+  type: http
+  seq: 1
+}
+
+docs {
+  Requires a valid {{token}} — run "auth/Login - success" (or Register) first.
+  Saves the created tag's id into {{tagId}} for the next requests in this folder.
+}
+
+post {
+  url: {{baseUrl}}/tags
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "food"
+  }
+}
+
+tests {
+  test("status is 201", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("returns a tag id", function () {
+    const body = res.getBody();
+    expect(body.success).to.equal(true);
+    expect(body.data.id).to.be.a("number");
+    expect(body.data.name).to.equal("food");
+  });
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    bru.setVar("tagId", res.getBody().data.id);
+  }
+}

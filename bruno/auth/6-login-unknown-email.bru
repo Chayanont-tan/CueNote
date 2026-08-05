@@ -1,0 +1,28 @@
+meta {
+  name: Login - unknown email
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "ghost@example.com",
+    "password": "whatever"
+  }
+}
+
+tests {
+  test("status is 401", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+
+  test("success is false", function () {
+    expect(res.getBody().success).to.equal(false);
+  });
+}

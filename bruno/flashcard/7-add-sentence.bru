@@ -1,0 +1,45 @@
+meta {
+  name: Sentences - add to flashcard
+  type: http
+  seq: 7
+}
+
+docs {
+  Requires {{cardId}} — run "4-generate-flashcards" first.
+  Saves the created sentence's id into {{sentenceId}} for the delete test.
+}
+
+post {
+  url: {{baseUrl}}/flashcards/{{cardId}}/sentences
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "sentence_text": "I practiced this word three times today."
+  }
+}
+
+tests {
+  test("status is 201", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("returns the saved sentence", function () {
+    const body = res.getBody();
+    expect(body.success).to.equal(true);
+    expect(body.data.sentence_text).to.equal("I practiced this word three times today.");
+    expect(body.data.source).to.equal("user");
+  });
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    bru.setVar("sentenceId", res.getBody().data.id);
+  }
+}

@@ -1,0 +1,30 @@
+meta {
+  name: Register - success
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "{{testEmail}}",
+    "password": "{{testPassword}}"
+  }
+}
+
+tests {
+  test("status is 201", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("returns an access_token", function () {
+    const body = res.getBody();
+    expect(body.success).to.equal(true);
+    expect(body.data.access_token).to.be.a("string").and.not.empty;
+  });
+}

@@ -1,0 +1,4 @@
+{
+  "success": false,
+  "message": "Key: 'RegisterRequest.Email' Error:Field validation for 'Email' failed on the 'email' tag\nKey: 'RegisterRequest.Password' Error:Field validation for 'Password' failed on the 'min' tag"
+}

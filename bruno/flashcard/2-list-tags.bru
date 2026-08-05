@@ -1,0 +1,30 @@
+meta {
+  name: Tags - list (home)
+  type: http
+  seq: 2
+}
+
+docs {
+  Requires a valid {{token}}. Only returns tags this user has at least one
+  flashcard for — run "3-generate-flashcards" first if this comes back empty.
+}
+
+get {
+  url: {{baseUrl}}/tags?limit=10
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+tests {
+  test("status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("success is true", function () {
+    expect(res.getBody().success).to.equal(true);
+  });
+}

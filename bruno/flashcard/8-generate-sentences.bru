@@ -1,0 +1,31 @@
+meta {
+  name: Sentences - AI generate 3
+  type: http
+  seq: 8
+}
+
+docs {
+  Requires {{cardId}} — run "4-generate-flashcards" first.
+}
+
+post {
+  url: {{baseUrl}}/flashcards/{{cardId}}/sentences/generate
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+tests {
+  test("status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns 3 candidate sentences", function () {
+    const body = res.getBody();
+    expect(body.success).to.equal(true);
+    expect(body.data.sentences).to.be.an("array").with.length(3);
+  });
+}

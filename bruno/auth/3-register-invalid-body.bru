@@ -1,0 +1,28 @@
+meta {
+  name: Register - invalid body
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "not-an-email",
+    "password": "short"
+  }
+}
+
+tests {
+  test("status is 400", function () {
+    expect(res.getStatus()).to.equal(400);
+  });
+
+  test("success is false", function () {
+    expect(res.getBody().success).to.equal(false);
+  });
+}
