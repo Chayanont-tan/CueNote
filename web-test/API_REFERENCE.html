@@ -1,0 +1,457 @@
+<title>CueNote — Tag &amp; Flashcard API Index</title>
+<style>
+  :root {
+    --bg: #e7ebe8;
+    --surface: #fbfcfa;
+    --surface-2: #eef1ee;
+    --ink: #1b2422;
+    --ink-soft: #5a6662;
+    --rule: #c7cec9;
+    --brass: #9a6d24;
+    --brass-soft: #c99a4c;
+    --get: #2b62c2;
+    --post: #2f8f5b;
+    --delete: #b6402a;
+    --get-bg: #e4ebf9;
+    --post-bg: #e3f2e9;
+    --delete-bg: #f8e6e1;
+    --code-bg: #f4f5f2;
+    --shadow: 0 1px 2px rgba(20, 30, 25, 0.06), 0 6px 16px rgba(20, 30, 25, 0.05);
+  }
+  :root[data-theme="dark"] {
+    --bg: #14181a;
+    --surface: #1c2224;
+    --surface-2: #222a2c;
+    --ink: #e7eae6;
+    --ink-soft: #9aa6a1;
+    --rule: #333d3f;
+    --brass: #d9a54b;
+    --brass-soft: #8a672f;
+    --get: #7ea6f2;
+    --post: #7bcb9c;
+    --delete: #e08a76;
+    --get-bg: #1f2a3d;
+    --post-bg: #1c322a;
+    --delete-bg: #382420;
+    --code-bg: #171c1d;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181a; --surface: #1c2224; --surface-2: #222a2c; --ink: #e7eae6;
+      --ink-soft: #9aa6a1; --rule: #333d3f; --brass: #d9a54b; --brass-soft: #8a672f;
+      --get: #7ea6f2; --post: #7bcb9c; --delete: #e08a76;
+      --get-bg: #1f2a3d; --post-bg: #1c322a; --delete-bg: #382420; --code-bg: #171c1d;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", Roboto, "Noto Sans Thai", sans-serif;
+    margin: 0;
+    padding: 2.5rem 1.25rem 4rem;
+  }
+  .sheet { max-width: 860px; margin: 0 auto; }
+
+  header.masthead {
+    border-bottom: 3px double var(--rule);
+    padding-bottom: 1.1rem;
+    margin-bottom: 1.4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  h1 {
+    font-family: Georgia, "Iowan Old Style", "Noto Serif Thai", serif;
+    font-size: 1.7rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    margin: 0 0 0.2rem;
+    text-wrap: balance;
+  }
+  .subtitle { color: var(--ink-soft); font-size: 0.9rem; margin: 0; }
+  .count-tag {
+    font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+    font-size: 0.75rem;
+    color: var(--brass);
+    border: 1px solid var(--brass-soft);
+    border-radius: 3px;
+    padding: 0.2rem 0.55rem;
+    white-space: nowrap;
+  }
+
+  .legend {
+    display: flex;
+    gap: 1.4rem;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    margin-bottom: 2rem;
+  }
+  .legend b { color: var(--ink); font-weight: 600; }
+  .swatch { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.1rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.85rem 1.1rem;
+    border-bottom: 1px solid var(--rule);
+    background: var(--surface-2);
+  }
+  .method {
+    font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 0.22rem 0.5rem;
+    border-radius: 3px;
+  }
+  .method.get { color: var(--get); background: var(--get-bg); }
+  .method.post { color: var(--post); background: var(--post-bg); }
+  .method.delete { color: var(--delete); background: var(--delete-bg); }
+  .path {
+    font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+    font-size: 0.88rem;
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+  .path .param { color: var(--brass); }
+  .desc { font-size: 0.82rem; color: var(--ink-soft); padding: 0 0 0 0; }
+
+  .check {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--ink-soft);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .card-body { padding: 0.9rem 1.1rem 1.1rem; }
+  .card-body .desc { margin-bottom: 0.75rem; }
+  .panes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem;
+  }
+  @media (max-width: 620px) {
+    .panes { grid-template-columns: 1fr; }
+  }
+  .pane-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    margin: 0 0 0.35rem;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 0.65rem 0.75rem;
+    margin: 0;
+    font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+    font-size: 0.76rem;
+    line-height: 1.5;
+    overflow-x: auto;
+    color: var(--ink);
+  }
+  .note {
+    font-size: 0.76rem;
+    color: var(--brass);
+    margin-top: 0.6rem;
+  }
+
+  footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+</style>
+
+<div class="sheet">
+  <header class="masthead">
+    <div>
+      <h1>Tag &amp; Flashcard API Index</h1>
+      <p class="subtitle">mission-note · internal/app/flashcard — static reference, ไม่ใช่หน้า test ยิงจริง</p>
+    </div>
+    <span class="count-tag">9 endpoints</span>
+  </header>
+
+  <div class="legend">
+    <span class="swatch"><span class="dot" style="background:var(--get)"></span> GET</span>
+    <span class="swatch"><span class="dot" style="background:var(--post)"></span> POST</span>
+    <span class="swatch"><span class="dot" style="background:var(--delete)"></span> DELETE</span>
+    <span><b>Auth:</b> ทุกเส้นต้องใส่ <code>Authorization: Bearer &lt;token&gt;</code></span>
+    <span><b>Envelope:</b> <code>{"success","data"}</code> หรือ <code>{"success":false,"message"}</code></span>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="method post">POST</span>
+      <span class="path">/api/v1/tags</span>
+      <span class="check"></span>
+    </div>
+    <div class="card-body">
+      <p class="desc">สร้าง tag ใหม่ (ยังไม่มีคำศัพท์/flashcard ข้างใน)</p>
+      <div class="panes">
+        <div>
+          <p class="pane-label">Request body</p>
+          <pre>{
+  "name": "ร้านข้าวเเกง"
+}</pre>
+        </div>
+        <div>
+          <p class="pane-label">Response 201</p>
+          <pre>{
+  "success": true,
+  "data": {
+    "id": 22,
+    "name": "ร้านข้าวเเกง",
+    "icon_url": null,
+    "badge_icon_url": null,
+    "total_words": 0,
+    "unlocked_words": 0
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="method get">GET</span>
+      <span class="path">/api/v1/tags<span class="param">?limit=5</span></span>
+      <span class="check"></span>
+    </div>
+    <div class="card-body">
+      <p class="desc">รายการ tag — คืนเฉพาะ tag ที่ user มี flashcard ปลดล็อกแล้วอย่างน้อย 1 ใบ (<code>unlocked_words &gt; 0</code>) ไม่ใส่ <code>limit</code> = เอาทั้งหมด</p>
+      <div class="panes">
+        <div>
+          <p class="pane-label">Query params</p>
+          <pre>limit  (optional, int)</pre>
+        </div>
+        <div>
+          <p class="pane-label">Response 200</p>
+          <pre>{
+  "success": true,
+  "data": [
+    { "id": 5, "name": "ขายน้ำปั่น",
+      "total_words": 5, "unlocked_words": 5, ... },
+    { "id": 14, "name": "เเนะนำตัวเอง",
+      "total_words": 10, "unlocked_words": 10, ... }
+  ]
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="method get">GET</span>
+      <span class="path">/api/v1/tags/<span class="param">:tag_id</span></span>
+      <span class="check"></span>
+    </div>
+    <div class="card-body">
+      <p class="desc">รายละเอียด tag เดียว — ไม่มี filter เหมือนข้อ 2 เห็นแม้ <code>unlocked_words = 0</code></p>
+      <div class="panes">
+        <div>
+          <p class="pane-label">Path param</p>
+          <pre>tag_id  (int)</pre>
+        </div>
+        <div>
+          <p class="pane-label">Response 200 / 404</p>
+          <pre>{ "success": true, "data": { "id": 22, ... } }
+{ "success": false, "message": "not found" }</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="method post">POST</span>
+      <span class="path">/api/v1/tags/<span class="param">:tag_id</span>/flashcards/generate</span>
+      <span class="check"></span>
+    </div>
+    <div class="card-body">
+      <p class="desc">ให้ AI เจนคำศัพท์ (ถ้า tag ยังไม่มีคำเลย) แล้วสร้าง flashcard ใหม่ทุกใบ — รูป + ประโยคตัวอย่าง 3 ประโยคเสมอ</p>
+      <div class="panes">
+        <div>
+          <p class="pane-label">Request body (optional)</p>
+          <pre>{ "limit": 5 }   // default = 5</pre>
+        </div>
+        <div>
+          <p class="pane-label">Response 201</p>
+          <pre>{
+  "success": true,
+  "data": {
+    "tag": { "id": 22, "unlocked_words": 5, ... },
+    "flashcards": [{
+      "id": "b3f1e2c0-...",
+      "word": "menu", "part_of_speech": "noun",
+      "meaning_th": "เมนูอาหาร", "level": "A1",
+      "image_url": "https://.../menu.png",
+      "ai_suggested_sentences": [
+        "Can I see the menu?", "...", "..."
+      ],
+      "sentences": null,
+      "created_at": "2026-08-10T09:00:00Z"
+    }]
+  }
+}</pre>
+        </div>
+      </div>
+      <p class="note">ช้ากว่าเส้นอื่น — เรียก AI 2-3 ครั้งต่อคำ (คำศัพท์ + รูป + ประโยค)</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="method get">GET</span>
+      <span class="path">/api/v1/tags/<span class="param">:tag_id</span>/flashcards<span class="param">?level=A1</span></span>
+      <span class="check"></span>
+    </div>
+    <div class="card-body">
+      <p class="desc">รายการ flashcard ทั้งหมดใน tag นี้ (ของ user คนที่ยิง) กรองระดับได้</p>
+      <div class="panes">
+        <div>
+          <p class="pane-label">Params</p>
+          <pre>tag_id  (path, int)
+level   (query, optional — A1/A2/...)</pre>
+        </div>
+        <div>
+          <p class="pane-label">Response 200</p>
+          <pre>{
+  "success": true,
+  "data": [{ "id": "b3f1e2c0-...", "word": "menu",
+    "sentences": [], "ai_suggested_sentences": [...],
+    ... }]
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="method get">GET</span>
+      <span class="path">/api/v1/flashcards/<span class="param">:card_id</span></span>
+      <span class="check"></span>
+    </div>
+    <div class="card-body">
+      <p class="desc">รายละเอียด flashcard ใบเดียว — มีทั้งประโยคที่ AI เสนอ และประโยคที่ user เพิ่มเอง</p>
+      <div class="panes">
+        <div>
+          <p class="pane-label">Path param</p>
+          <pre>card_id  (uuid string)</pre>
+        </div>
+        <div>
+          <p class="pane-label">Response 200</p>
+          <pre>{ "success": true, "data": {
+  "id": "b3f1e2c0-...", "word": "menu",
+  "sentences": [{ "id": 8, "sentence_text": "I read the menu.",
+    "source": "user", "created_at": "..." }],
+  "ai_suggested_sentences": ["Can I see the menu?", ...]
+}}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="method post">POST</span>
+      <span class="path">/api/v1/flashcards/<span class="param">:card_id</span>/sentences</span>
+      <span class="check"></span>
+    </div>
+    <div class="card-body">
+      <p class="desc">เพิ่มประโยคที่ user พิมพ์เอง (หรือกดเลือกจาก AI suggestion มา save)</p>
+      <div class="panes">
+        <div>
+          <p class="pane-label">Request body</p>
+          <pre>{ "sentence_text": "I read the menu before ordering." }</pre>
+        </div>
+        <div>
+          <p class="pane-label">Response 201</p>
+          <pre>{ "success": true, "data": {
+  "id": 9, "sentence_text": "I read the menu before ordering.",
+  "source": "user", "created_at": "2026-08-10T09:05:00Z"
+}}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="method post">POST</span>
+      <span class="path">/api/v1/flashcards/<span class="param">:card_id</span>/sentences/generate</span>
+      <span class="check"></span>
+    </div>
+    <div class="card-body">
+      <p class="desc">สั่ง AI เจนประโยคตัวอย่างชุดใหม่ 3 ประโยค (เผื่อไม่ชอบชุดเดิม)</p>
+      <div class="panes">
+        <div>
+          <p class="pane-label">Request body</p>
+          <pre>—  (ไม่ต้องส่ง)</pre>
+        </div>
+        <div>
+          <p class="pane-label">Response 200</p>
+          <pre>{ "success": true, "data": {
+  "sentences": [
+    "The menu changes every season.",
+    "She ordered from the menu.",
+    "Ask for the menu, please."
+  ]
+}}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span class="method delete">DELETE</span>
+      <span class="path">/api/v1/sentences/<span class="param">:sentence_id</span></span>
+      <span class="check"></span>
+    </div>
+    <div class="card-body">
+      <p class="desc">ลบประโยคที่ user เคยเพิ่มไว้ (จากข้อ 7)</p>
+      <div class="panes">
+        <div>
+          <p class="pane-label">Path param</p>
+          <pre>sentence_id  (int)</pre>
+        </div>
+        <div>
+          <p class="pane-label">Response 200 / 404</p>
+          <pre>{ "success": true, "data": { "deleted": true } }
+{ "success": false, "message": "not found" }</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    เอกสารนี้เป็น static reference (ไม่ยิง request จริง) — สร้างจากโค้ดใน <code>internal/app/flashcard/</code> ตอนวันที่ทำ ถ้าแก้ DTO/route ทีหลังต้องอัปเดตหน้านี้เองด้วย ช่อง ☐ ที่หัวการ์ดไว้ติ๊กเองว่าฝั่ง frontend ต่อเสร็จแล้วหรือยัง
+  </footer>
+</div>

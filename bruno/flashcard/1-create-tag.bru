@@ -4,11 +4,6 @@ meta {
   seq: 1
 }
 
-docs {
-  Requires a valid {{token}} — run "auth/Login - success" (or Register) first.
-  Saves the created tag's id into {{tagId}} for the next requests in this folder.
-}
-
 post {
   url: {{baseUrl}}/tags
   body: json
@@ -21,7 +16,13 @@ auth:bearer {
 
 body:json {
   {
-    "name": "food"
+    "name": "startup"
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    bru.setVar("tagId", res.getBody().data.id);
   }
 }
 
@@ -29,7 +30,7 @@ tests {
   test("status is 201", function () {
     expect(res.getStatus()).to.equal(201);
   });
-
+  
   test("returns a tag id", function () {
     const body = res.getBody();
     expect(body.success).to.equal(true);
@@ -38,8 +39,7 @@ tests {
   });
 }
 
-script:post-response {
-  if (res.getStatus() === 201) {
-    bru.setVar("tagId", res.getBody().data.id);
-  }
+docs {
+  Requires a valid {{token}} — run "auth/Login - success" (or Register) first.
+  Saves the created tag's id into {{tagId}} for the next requests in this folder.
 }

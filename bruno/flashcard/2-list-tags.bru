@@ -4,15 +4,14 @@ meta {
   seq: 2
 }
 
-docs {
-  Requires a valid {{token}}. Only returns tags this user has at least one
-  flashcard for — run "3-generate-flashcards" first if this comes back empty.
-}
-
 get {
-  url: {{baseUrl}}/tags?limit=10
+  url: {{baseUrl}}/tags?limit=5
   body: none
   auth: bearer
+}
+
+params:query {
+  limit: 5
 }
 
 auth:bearer {
@@ -23,8 +22,13 @@ tests {
   test("status is 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
-
+  
   test("success is true", function () {
     expect(res.getBody().success).to.equal(true);
   });
+}
+
+docs {
+  Requires a valid {{token}}. Only returns tags this user has at least one
+  flashcard for — run "3-generate-flashcards" first if this comes back empty.
 }

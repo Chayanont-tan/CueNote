@@ -104,7 +104,7 @@ func Init(ctx context.Context) (*App, error) {
 	// 3. PROTECTED ROUTES (กลุ่ม API ลับ - บังคับตรวจ JWT Token ทุกเส้นผ่าน RequireAuth)
 	// =========================================================================
 	protected := api.Group("")
-	protected.Use(middleware.RequireAuth(cfg.JWTSecret)) // <-- ดักตรวจ Token ตรงนี้
+	protected.Use(middleware.RequireAuth(cfg.JWTSecret))
 
 	// โมดูลการเรียนรู้ (ต้องยืนยันตัวตนก่อนเพื่อดึง/บันทึกข้อมูลเฉพาะบุคคล)
 	flashcard.RegisterModule(protected, pool, aiClient)

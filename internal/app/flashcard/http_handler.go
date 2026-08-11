@@ -32,13 +32,19 @@ func respondNotFoundAware(c *gin.Context, err error) {
 // --- Tags ---
 
 func (h *handler) createTag(c *gin.Context) {
+	userID, ok := middleware.UserID(c)
+	if !ok {
+		response.Error(c, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
 	var req CreateTagRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, validation.BindErrorMessage(err))
 		return
 	}
 
-	tag, err := h.service.CreateTag(c.Request.Context(), req.Name)
+	tag, err := h.service.CreateTag(c.Request.Context(), userID, req.Name)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
@@ -63,27 +69,6 @@ func (h *handler) listTags(c *gin.Context) {
 	response.Success(c, http.StatusOK, tags)
 }
 
-func (h *handler) getTag(c *gin.Context) {
-	userID, ok := middleware.UserID(c)
-	if !ok {
-		response.Error(c, http.StatusUnauthorized, "unauthorized")
-		return
-	}
-
-	tagID, err := strconv.ParseInt(c.Param("tag_id"), 10, 64)
-	if err != nil {
-		response.Error(c, http.StatusBadRequest, "invalid tag id")
-		return
-	}
-
-	tag, err := h.service.GetTag(c.Request.Context(), tagID, userID)
-	if err != nil {
-		respondNotFoundAware(c, err)
-		return
-	}
-	response.Success(c, http.StatusOK, tag)
-}
-
 // --- Flashcards ---
 
 func (h *handler) generateFlashcards(c *gin.Context) {
@@ -105,7 +90,7 @@ func (h *handler) generateFlashcards(c *gin.Context) {
 		return
 	}
 
-	result, err := h.service.GenerateFlashcards(c.Request.Context(), tagID, userID, req.Limit)
+	result, err := h.service.GenerateFlashcards(c.Request.Context(), tagID, userID, req.Word)
 	if err != nil {
 		respondNotFoundAware(c, err)
 		return

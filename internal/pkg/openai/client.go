@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strings"
 
 	openaiSDK "github.com/sashabaranov/go-openai"
 )
@@ -61,7 +62,8 @@ type OpenAIVocabItem struct {
 }
 
 // GenerateVocabulariesByTag ยิง AI เพื่อเจนคำศัพท์และประโยคตัวอย่างตาม Tag
-func (c *Client) GenerateVocabulariesByTag(ctx context.Context, tag string, limit int) (*OpenAIVocabGenResponse, error) {
+// excludeWords (ถ้ามี) คือคำที่ tag นี้มีอยู่แล้ว บอก AI ไว้ไม่ให้เจนซ้ำ
+func (c *Client) GenerateVocabulariesByTag(ctx context.Context, tag string, limit int, excludeWords []string) (*OpenAIVocabGenResponse, error) {
 	systemPrompt := `You are an English language learning assistant.
 Generate English vocabulary words based on the user's requested tag/topic.
 You MUST respond strictly in valid JSON format matching this structure:
@@ -79,6 +81,9 @@ You MUST respond strictly in valid JSON format matching this structure:
 }`
 
 	userPrompt := fmt.Sprintf("Generate %d vocabulary words for the topic/tag: '%s'. Provide 3 example sentences for each word.", limit, tag)
+	if len(excludeWords) > 0 {
+		userPrompt += fmt.Sprintf(" Do not repeat these words that are already used: %s.", strings.Join(excludeWords, ", "))
+	}
 
 	req := openaiSDK.ChatCompletionRequest{
 		Model: c.model, // 👈 ใช้ model ตามที่ตั้งไว้ใน struct
@@ -108,6 +113,56 @@ You MUST respond strictly in valid JSON format matching this structure:
 	}
 
 	var result OpenAIVocabGenResponse
+	err = json.Unmarshal([]byte(resp.Choices[0].Message.Content), &result)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal ai response: %w", err)
+	}
+
+	return &result, nil
+}
+
+// GenerateVocabularyDetails ยิง AI เพื่อเติม part_of_speech/meaning_th/level ให้คำที่ user
+// พิมพ์เอง (คำนี้ยังไม่มีอยู่ในระบบมาก่อน)
+func (c *Client) GenerateVocabularyDetails(ctx context.Context, word string) (*OpenAIVocabItem, error) {
+	systemPrompt := `You are an English language learning assistant.
+You MUST respond strictly in valid JSON format matching this structure:
+{
+  "word": "string",
+  "part_of_speech": "noun/verb/adjective/etc.",
+  "meaning_th": "คำแปลภาษาไทย",
+  "level": "CEFR level: one of A1, A2, B1, B2, C1, C2 based on word difficulty"
+}`
+
+	userPrompt := fmt.Sprintf("Give the part of speech, Thai meaning, and CEFR level for the English word '%s'.", word)
+
+	req := openaiSDK.ChatCompletionRequest{
+		Model: c.model,
+		ResponseFormat: &openaiSDK.ChatCompletionResponseFormat{
+			Type: openaiSDK.ChatCompletionResponseFormatTypeJSONObject,
+		},
+		Messages: []openaiSDK.ChatCompletionMessage{
+			{
+				Role:    openaiSDK.ChatMessageRoleSystem,
+				Content: systemPrompt,
+			},
+			{
+				Role:    openaiSDK.ChatMessageRoleUser,
+				Content: userPrompt,
+			},
+		},
+		Temperature: 0.7,
+	}
+
+	resp, err := c.sdk.CreateChatCompletion(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("ai chat completion failed: %w", err)
+	}
+
+	if len(resp.Choices) == 0 {
+		return nil, fmt.Errorf("empty response from ai")
+	}
+
+	var result OpenAIVocabItem
 	err = json.Unmarshal([]byte(resp.Choices[0].Message.Content), &result)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal ai response: %w", err)

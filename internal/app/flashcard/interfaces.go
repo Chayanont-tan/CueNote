@@ -10,12 +10,13 @@ import (
 // covers tags, the vocabulary catalog, flashcards, and their sentences.
 type Repository interface {
 	// Tags
-	CreateTag(ctx context.Context, name string) (Tag, error)
+	CreateTag(ctx context.Context, userID int64, name string) (Tag, error)
 	ListTagsForUser(ctx context.Context, userID int64, limit int) ([]TagResponse, error)
 	GetTagByID(ctx context.Context, tagID int64, userID int64) (TagResponse, error)
 
 	// Vocabulary catalog (internal to this module — no HTTP endpoint of its own)
-	GetRandomVocabByTagID(ctx context.Context, tagID int64, limit int) ([]Vocabulary, error)
+	FindVocabByWord(ctx context.Context, word string) (Vocabulary, bool, error)
+	ListVocabWordsForTag(ctx context.Context, tagID int64) ([]string, error)
 	SaveVocabulariesForTag(ctx context.Context, tagID int64, items []openai.OpenAIVocabItem) ([]Vocabulary, error)
 
 	// Flashcards
@@ -31,11 +32,10 @@ type Repository interface {
 
 // Service defines the business logic operations for the flashcard feature.
 type Service interface {
-	CreateTag(ctx context.Context, name string) (TagResponse, error)
+	CreateTag(ctx context.Context, userID int64, name string) (TagResponse, error)
 	ListTags(ctx context.Context, userID int64, limit int) ([]TagResponse, error)
-	GetTag(ctx context.Context, tagID int64, userID int64) (TagResponse, error)
 
-	GenerateFlashcards(ctx context.Context, tagID int64, userID int64, limit int) (*GenerateFlashcardsResponse, error)
+	GenerateFlashcards(ctx context.Context, tagID int64, userID int64, word string) (*GenerateFlashcardsResponse, error)
 	ListFlashcards(ctx context.Context, tagID int64, userID int64, level string) ([]FlashcardResponse, error)
 	GetFlashcard(ctx context.Context, flashcardID string, userID int64) (FlashcardResponse, error)
 

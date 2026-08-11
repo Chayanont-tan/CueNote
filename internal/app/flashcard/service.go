@@ -2,24 +2,11 @@ package flashcard
 
 import (
 	"context"
-	"fmt"
+	"math"
+	"strings"
 
 	"mission-note/internal/pkg/openai"
 )
-
-// unlockThresholds คือเกณฑ์ปลดล็อก Shadowing scenario ทีละขั้น (scenario 1/2/3)
-var unlockThresholds = []int{5, 10, 15}
-
-// nextUnlockThreshold คืนเกณฑ์คำศัพท์ถัดไปที่ยังไม่ปลดล็อก ถ้าปลดล็อกครบทุกขั้นแล้ว
-// คืนเกณฑ์สูงสุด (ไม่มี scenario เพิ่มให้ปลดล็อกอีกในตอนนี้)
-func nextUnlockThreshold(unlockedWords int) int {
-	for _, threshold := range unlockThresholds {
-		if unlockedWords < threshold {
-			return threshold
-		}
-	}
-	return unlockThresholds[len(unlockThresholds)-1]
-}
 
 type service struct {
 	repo         Repository
@@ -33,67 +20,61 @@ func NewService(repo Repository, openaiClient *openai.Client) Service {
 
 // --- Tags ---
 
-func (s *service) CreateTag(ctx context.Context, name string) (TagResponse, error) {
-	tag, err := s.repo.CreateTag(ctx, name)
+func (s *service) CreateTag(ctx context.Context, userID int64, name string) (TagResponse, error) {
+	tag, err := s.repo.CreateTag(ctx, userID, name)
 	if err != nil {
 		return TagResponse{}, err
 	}
-	return TagResponse{ID: tag.ID, Name: tag.Name, UnlockThreshold: nextUnlockThreshold(0)}, nil
+	return TagResponse{ID: tag.ID, Name: tag.Name}, nil
 }
 
 func (s *service) ListTags(ctx context.Context, userID int64, limit int) ([]TagResponse, error) {
+	if limit <= 0 {
+		limit = math.MaxInt32
+	}
 	tags, err := s.repo.ListTagsForUser(ctx, userID, limit)
 	if err != nil {
 		return nil, err
 	}
-	for i := range tags {
-		tags[i].UnlockThreshold = nextUnlockThreshold(tags[i].UnlockedWords)
-	}
 	return tags, nil
-}
-
-func (s *service) GetTag(ctx context.Context, tagID int64, userID int64) (TagResponse, error) {
-	tag, err := s.repo.GetTagByID(ctx, tagID, userID)
-	if err != nil {
-		return TagResponse{}, err
-	}
-	tag.UnlockThreshold = nextUnlockThreshold(tag.UnlockedWords)
-	return tag, nil
 }
 
 // --- Flashcards ---
 
-// GenerateFlashcards ค้นหาคำศัพท์ที่มีอยู่แล้วใน tag นี้ ถ้าไม่มีจะเจนใหม่ด้วย AI
-// แล้วต่อคำสร้าง flashcard ใหม่ทุกใบ (รูป + ประโยคตัวอย่างชุดใหม่เสมอ แม้คำจะซ้ำเดิม)
-func (s *service) GenerateFlashcards(ctx context.Context, tagID int64, userID int64, limit int) (*GenerateFlashcardsResponse, error) {
-	if limit <= 0 {
-		limit = 10
-	}
-
-	tag, err := s.repo.GetTagByID(ctx, tagID, userID)
+// GenerateFlashcards ถ้า user พิมพ์คำศัพท์เองมาใน word ก็ใช้คำนั้นตรงๆ (AI เติมแค่
+// part_of_speech/meaning_th/level ให้คำที่ยังไม่มีในระบบ) ถ้าไม่ส่ง word มาเลยถึงให้ AI
+// เจนคำศัพท์ใหม่ 1 คำจากชื่อ tag แทน (ไม่เอาคำที่ tag นี้มีอยู่แล้วซ้ำ) แล้วสร้าง flashcard
+// ใหม่ (ประโยคตัวอย่างชุดใหม่เสมอ แม้คำจะซ้ำเดิม — ไม่เจนรูป ใช้ icon แทนฝั่ง frontend)
+func (s *service) GenerateFlashcards(ctx context.Context, tagID int64, userID int64, word string) (*GenerateFlashcardsResponse, error) {
+	tag, err := s.repo.GetTagByID(ctx, tagID, userID) // เช็คก่อนว่า tag นี้เป็นของ user คนนี้จริง ก่อนจะเจน flashcard เพิ่มให้
 	if err != nil {
 		return nil, err
 	}
 
-	items, err := s.getOrGenerateVocab(ctx, tag, limit)
-	if err != nil {
-		return nil, err
-	}
+	word = strings.TrimSpace(word)
 
-	flashcards := make([]FlashcardResponse, 0, len(items))
-	for _, item := range items {
-		prompt := fmt.Sprintf("An illustration representing the English word '%s' (%s): %s", item.Word, item.PartOfSpeech, item.MeaningTH)
-		imageURL, err := s.openaiClient.GenerateImage(ctx, prompt)
+	var items []Vocabulary
+	if word != "" {
+		item, err := s.resolveUserWord(ctx, tag, word) // ใช้คำที่ user พิมพ์มาเองตรงๆ (เช็คก่อนว่ามีอยู่ในระบบแล้วหรือยัง ถ้ามีแล้วก็เอา part_of_speech/meaning_th/level เดิมมาใช้เลย)
 		if err != nil {
 			return nil, err
 		}
+		items = []Vocabulary{item}
+	} else {
+		items, err = s.generateVocabFromTag(ctx, tag) // ดูจาก tag ก่อนว่าอะไร ละเช็ค ว่ามีคำไหนใน tag ละบ้างจะได้ไม่ซ้ำ
+		if err != nil {
+			return nil, err
+		}
+	}
 
+	flashcards := make([]GeneratedFlashcardResponse, 0, len(items))
+	for _, item := range items {
 		sentences, err := s.openaiClient.GenerateSentences(ctx, item.Word, item.MeaningTH)
 		if err != nil {
 			return nil, err
 		}
 
-		fc, savedSentences, err := s.repo.CreateFlashcardWithSentences(ctx, userID, item.ID, imageURL, sentences)
+		fc, savedSentences, err := s.repo.CreateFlashcardWithSentences(ctx, userID, item.ID, "", sentences)
 		if err != nil {
 			return nil, err
 		}
@@ -103,43 +84,60 @@ func (s *service) GenerateFlashcards(ctx context.Context, tagID int64, userID in
 			aiSentences = append(aiSentences, saved.SentenceText)
 		}
 
-		flashcards = append(flashcards, FlashcardResponse{
+		flashcards = append(flashcards, GeneratedFlashcardResponse{
 			ID:                   fc.ID,
 			Word:                 item.Word,
 			PartOfSpeech:         item.PartOfSpeech,
 			MeaningTH:            item.MeaningTH,
-			Level:                item.Level,
-			ImageURL:             fc.ImageURL,
 			AISuggestedSentences: aiSentences,
 			CreatedAt:            fc.CreatedAt,
 		})
 	}
 
-	// เช็ค progress ล่าสุดหลังสร้าง flashcard ใหม่ไปแล้ว (unlocked_words เปลี่ยนไปแล้ว)
-	refreshedTag, err := s.repo.GetTagByID(ctx, tagID, userID)
-	if err != nil {
-		return nil, err
-	}
-	refreshedTag.UnlockThreshold = nextUnlockThreshold(refreshedTag.UnlockedWords)
-
-	return &GenerateFlashcardsResponse{
-		Tag:        refreshedTag,
-		Flashcards: flashcards,
-	}, nil
+	return &GenerateFlashcardsResponse{Flashcards: flashcards}, nil
 }
 
-// getOrGenerateVocab ค้นหาคำศัพท์ที่มีอยู่แล้วใน tag นี้ ถ้าไม่มีจะเจนใหม่ด้วย AI แล้วบันทึกลง DB
-func (s *service) getOrGenerateVocab(ctx context.Context, tag TagResponse, limit int) ([]Vocabulary, error) {
-	items, err := s.repo.GetRandomVocabByTagID(ctx, tag.ID, limit)
+// resolveUserWord ใช้คำที่ user พิมพ์เองตรงๆ — เช็คก่อนว่ามีอยู่ในระบบแล้วหรือยัง (ไม่งั้นจะ
+// เจน AI ซ้ำโดยไม่จำเป็น) มีแล้วก็เอา part_of_speech/meaning_th/level เดิมมาใช้เลย ถ้ายังไม่มี
+// ค่อยให้ AI เติมรายละเอียดให้คำนั้น
+func (s *service) resolveUserWord(ctx context.Context, tag TagResponse, word string) (Vocabulary, error) {
+	var item openai.OpenAIVocabItem
+
+	existing, found, err := s.repo.FindVocabByWord(ctx, word) // หาในระบบก่อนว่ามีคำนี้อยู่แล้วหรือยัง ถ้ามีแล้วก็เอา part_of_speech/meaning_th/level เดิมมาใช้เลย
+	if err != nil {
+		return Vocabulary{}, err
+	}
+	if found {
+		item = openai.OpenAIVocabItem{
+			Word:         existing.Word,
+			PartOfSpeech: existing.PartOfSpeech,
+			MeaningTH:    existing.MeaningTH,
+			Level:        existing.Level,
+		}
+	} else {
+		detail, err := s.openaiClient.GenerateVocabularyDetails(ctx, word)
+		if err != nil {
+			return Vocabulary{}, err
+		}
+		item = *detail
+	}
+
+	saved, err := s.repo.SaveVocabulariesForTag(ctx, tag.ID, []openai.OpenAIVocabItem{item})
+	if err != nil {
+		return Vocabulary{}, err
+	}
+	return saved[0], nil
+}
+
+// generateVocabFromTag ไม่มี user พิมพ์คำมา ให้ AI เจนคำศัพท์ใหม่ 1 คำจากชื่อ tag เสมอ โดยบอก
+// AI ไม่ให้เจนคำที่ tag นี้มีอยู่แล้วซ้ำ
+func (s *service) generateVocabFromTag(ctx context.Context, tag TagResponse) ([]Vocabulary, error) {
+	existingWords, err := s.repo.ListVocabWordsForTag(ctx, tag.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(items) > 0 {
-		return items, nil
-	}
-
-	aiResponse, err := s.openaiClient.GenerateVocabulariesByTag(ctx, tag.Name, limit)
+	aiResponse, err := s.openaiClient.GenerateVocabulariesByTag(ctx, tag.Name, 1, existingWords)
 	if err != nil {
 		return nil, err
 	}

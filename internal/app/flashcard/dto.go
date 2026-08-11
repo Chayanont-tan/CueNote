@@ -14,14 +14,12 @@ type TagResponse struct {
 	IconURL         *string `json:"icon_url"`
 	BadgeIconURL    *string `json:"badge_icon_url"`
 	TotalWords      int     `json:"total_words"`
-	UnlockedWords   int     `json:"unlocked_words"`
-	UnlockThreshold int     `json:"unlock_threshold"`
 }
 
 // --- Flashcards ---
 
 type GenerateFlashcardsRequest struct {
-	Limit int `json:"limit"`
+	Word string `json:"word"`
 }
 
 type SentenceResponse struct {
@@ -43,9 +41,17 @@ type FlashcardResponse struct {
 	CreatedAt            time.Time          `json:"created_at"`
 }
 
+type GeneratedFlashcardResponse struct {
+	ID                   string    `json:"id"`
+	Word                 string    `json:"word"`
+	PartOfSpeech         string    `json:"part_of_speech"`
+	MeaningTH            string    `json:"meaning_th"`
+	AISuggestedSentences []string  `json:"ai_suggested_sentences"`
+	CreatedAt            time.Time `json:"created_at"`
+}
+
 type GenerateFlashcardsResponse struct {
-	Tag        TagResponse         `json:"tag"`
-	Flashcards []FlashcardResponse `json:"flashcards"`
+	Flashcards []GeneratedFlashcardResponse `json:"flashcards"`
 }
 
 // --- Sentences ---
