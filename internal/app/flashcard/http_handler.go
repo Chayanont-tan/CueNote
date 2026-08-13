@@ -3,6 +3,7 @@ package flashcard
 import (
 	"errors"
 	"io"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -90,7 +91,33 @@ func (h *handler) generateFlashcards(c *gin.Context) {
 		return
 	}
 
-	result, err := h.service.GenerateFlashcards(c.Request.Context(), tagID, userID, req.Word)
+	result, err := h.service.PreviewFlashcard(c.Request.Context(), tagID, userID, req.Word)
+	if err != nil {
+		if errors.Is(err, ErrVocabAlreadyExists) {
+			response.Error(c, http.StatusConflict, err.Error())
+			return
+		}
+		respondNotFoundAware(c, err)
+		return
+	}
+	slog.Info("result", "result", result)
+	response.Success(c, http.StatusCreated, result)
+}
+
+func (h *handler) saveFlashcard(c *gin.Context) {
+	userID, ok := middleware.UserID(c)
+	if !ok {
+		response.Error(c, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	var req SaveFlashcardRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, validation.BindErrorMessage(err))
+		return
+	}
+
+	result, err := h.service.SaveFlashcard(c.Request.Context(), userID, req)
 	if err != nil {
 		respondNotFoundAware(c, err)
 		return

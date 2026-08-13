@@ -9,11 +9,11 @@ type CreateTagRequest struct {
 }
 
 type TagResponse struct {
-	ID              int64   `json:"id"`
-	Name            string  `json:"name"`
-	IconURL         *string `json:"icon_url"`
-	BadgeIconURL    *string `json:"badge_icon_url"`
-	TotalWords      int     `json:"total_words"`
+	ID           int64   `json:"id"`
+	Name         string  `json:"name"`
+	IconURL      *string `json:"icon_url"`
+	BadgeIconURL *string `json:"badge_icon_url"`
+	TotalWords   int     `json:"total_words"`
 }
 
 // --- Flashcards ---
@@ -41,7 +41,7 @@ type FlashcardResponse struct {
 	CreatedAt            time.Time          `json:"created_at"`
 }
 
-type GeneratedFlashcardResponse struct {
+type PreviewFlashcardItem struct {
 	ID                   string    `json:"id"`
 	Word                 string    `json:"word"`
 	PartOfSpeech         string    `json:"part_of_speech"`
@@ -50,8 +50,19 @@ type GeneratedFlashcardResponse struct {
 	CreatedAt            time.Time `json:"created_at"`
 }
 
-type GenerateFlashcardsResponse struct {
-	Flashcards []GeneratedFlashcardResponse `json:"flashcards"`
+type PreviewFlashcardResponse struct {
+	Flashcards []PreviewFlashcardItem `json:"flashcards"`
+}
+
+// SaveFlashcardRequest คือคำศัพท์ที่ผ่านการ preview มาแล้ว (ทั้งจาก path user พิมพ์เอง
+// และ path AI เจนจาก tag) ให้ frontend ส่งกลับมาตอนกด save จริง
+type SaveFlashcardRequest struct {
+	TagID        int64    `json:"tag_id" binding:"required"`
+	Word         string   `json:"word" binding:"required"`
+	PartOfSpeech string   `json:"part_of_speech"`
+	MeaningTH    string   `json:"meaning_th" binding:"required"`
+	Level        string   `json:"level"`
+	Sentences    []string `json:"sentences"`
 }
 
 // --- Sentences ---

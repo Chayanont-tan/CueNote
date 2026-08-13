@@ -35,7 +35,8 @@ type Service interface {
 	CreateTag(ctx context.Context, userID int64, name string) (TagResponse, error)
 	ListTags(ctx context.Context, userID int64, limit int) ([]TagResponse, error)
 
-	GenerateFlashcards(ctx context.Context, tagID int64, userID int64, word string) (*GenerateFlashcardsResponse, error)
+	PreviewFlashcard(ctx context.Context, tagID int64, userID int64, word string) (*PreviewFlashcardResponse, error)
+	SaveFlashcard(ctx context.Context, userID int64, req SaveFlashcardRequest) (FlashcardResponse, error)
 	ListFlashcards(ctx context.Context, tagID int64, userID int64, level string) ([]FlashcardResponse, error)
 	GetFlashcard(ctx context.Context, flashcardID string, userID int64) (FlashcardResponse, error)
 
