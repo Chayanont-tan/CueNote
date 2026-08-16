@@ -11,23 +11,17 @@ import (
 	"mission-note/internal/pkg/openai"
 )
 
-// ErrNotFound is returned when a flashcard/sentence isn't found, or exists
-// but doesn't belong to the requesting user.
 var ErrNotFound = errors.New("not found")
 
 type pgRepository struct {
 	pool *pgxpool.Pool
 }
 
-// NewPgRepository creates a PostgreSQL-backed Repository.
 func NewPgRepository(pool *pgxpool.Pool) Repository {
 	return &pgRepository{pool: pool}
 }
 
-// --- Tags ---
-
 func (r *pgRepository) CreateTag(ctx context.Context, userID int64, name string) (Tag, error) {
-	// language=SQL
 	const query = `
 		INSERT INTO tags (name, created_by)
 		VALUES ($1, $2)
@@ -43,7 +37,6 @@ func (r *pgRepository) CreateTag(ctx context.Context, userID int64, name string)
 }
 
 func (r *pgRepository) ListTagsForUser(ctx context.Context, userID int64, limit int) ([]TagResponse, error) {
-	// language=SQL
 	const query = `
 		SELECT
 			t.id,
@@ -79,7 +72,6 @@ func (r *pgRepository) ListTagsForUser(ctx context.Context, userID int64, limit 
 }
 
 func (r *pgRepository) GetTagByID(ctx context.Context, tagID int64, userID int64) (TagResponse, error) {
-	// language=SQL
 	const query = `
 		SELECT
 			t.id,
@@ -102,10 +94,7 @@ func (r *pgRepository) GetTagByID(ctx context.Context, tagID int64, userID int64
 	return t, nil
 }
 
-// --- Vocabulary catalog ---
-
 func (r *pgRepository) FindVocabByWord(ctx context.Context, word string) (Vocabulary, bool, error) {
-	// language=SQL
 	const query = `
 		SELECT id, word, part_of_speech, meaning_th, level, created_at
 		FROM vocabularies
@@ -125,7 +114,6 @@ func (r *pgRepository) FindVocabByWord(ctx context.Context, word string) (Vocabu
 }
 
 func (r *pgRepository) ListVocabWordsForTag(ctx context.Context, tagID int64) ([]string, error) {
-	// language=SQL
 	const query = `
 		SELECT v.word
 		FROM vocabularies v
@@ -169,7 +157,6 @@ func (r *pgRepository) SaveVocabulariesForTag(ctx context.Context, tagID int64, 
 		}
 
 		var v Vocabulary
-		// language=SQL
 		const vocabQuery = `
 			INSERT INTO vocabularies (word, part_of_speech, meaning_th, level)
 			VALUES ($1, $2, $3, $4)
@@ -184,7 +171,6 @@ func (r *pgRepository) SaveVocabulariesForTag(ctx context.Context, tagID int64, 
 			return nil, fmt.Errorf("failed to insert vocabulary (%s): %w", item.Word, err)
 		}
 
-		// language=SQL
 		const relationQuery = `
 			INSERT INTO vocabulary_tags (vocabulary_id, tag_id)
 			VALUES ($1, $2)
@@ -204,8 +190,6 @@ func (r *pgRepository) SaveVocabulariesForTag(ctx context.Context, tagID int64, 
 	return saved, nil
 }
 
-// --- Flashcards ---
-
 func (r *pgRepository) CreateFlashcardWithSentences(ctx context.Context, userID int64, vocabularyID int64, imageURL string, aiSentences []string) (Flashcard, []AISuggestedSentence, error) {
 	tx, err := r.pool.Begin(ctx)
 	if err != nil {
@@ -214,7 +198,6 @@ func (r *pgRepository) CreateFlashcardWithSentences(ctx context.Context, userID 
 	defer tx.Rollback(ctx)
 
 	var flashcard Flashcard
-	// language=SQL
 	const flashcardQuery = `
 		INSERT INTO flashcards (user_id, vocabulary_id, image_url)
 		VALUES ($1, $2, $3)
@@ -231,7 +214,6 @@ func (r *pgRepository) CreateFlashcardWithSentences(ctx context.Context, userID 
 	savedSentences := make([]AISuggestedSentence, 0, len(aiSentences))
 	for _, sentence := range aiSentences {
 		saved := AISuggestedSentence{FlashcardID: flashcard.ID, SentenceText: sentence}
-		// language=SQL
 		const sentenceQuery = `
 			INSERT INTO ai_suggested_sentences (flashcard_id, sentence_text)
 			VALUES ($1, $2)
@@ -251,32 +233,29 @@ func (r *pgRepository) CreateFlashcardWithSentences(ctx context.Context, userID 
 	return flashcard, savedSentences, nil
 }
 
-func (r *pgRepository) ListFlashcardsForTag(ctx context.Context, tagID int64, userID int64, level string) ([]FlashcardResponse, error) {
-	// language=SQL
+func (r *pgRepository) ListFlashcardsForTag(ctx context.Context, tagID int64, userID int64) ([]FlashcardForTag, error) {
+	// เตรียม คำสั้ง sql
 	query := `
-		SELECT f.id, v.word, v.part_of_speech, v.meaning_th, v.level, f.image_url, f.created_at
+		SELECT f.id, v.word, v.part_of_speech, v.meaning_th, v.level
 		FROM flashcards f
 		JOIN vocabularies v ON v.id = f.vocabulary_id
 		JOIN vocabulary_tags vt ON vt.vocabulary_id = v.id
 		WHERE vt.tag_id = $1 AND f.user_id = $2
+		ORDER BY f.created_at DESC;
 	`
-	args := []any{tagID, userID}
-	if level != "" {
-		query += " AND v.level = $3"
-		args = append(args, level)
-	}
-	query += " ORDER BY f.created_at DESC;"
-
-	rows, err := r.pool.Query(ctx, query, args...)
+	// ส่งคำสั้ง sql ไปที่ database
+	rows, err := r.pool.Query(ctx, query, tagID, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query flashcards for tag: %w", err)
 	}
 	defer rows.Close()
+	// สร้าง slice มาเก็บ
 
-	result := []FlashcardResponse{}
+	result := []FlashcardForTag{}
+
 	for rows.Next() {
-		var f FlashcardResponse
-		if err := rows.Scan(&f.ID, &f.Word, &f.PartOfSpeech, &f.MeaningTH, &f.Level, &f.ImageURL, &f.CreatedAt); err != nil {
+		var f FlashcardForTag
+		if err := rows.Scan(&f.ID, &f.Word, &f.PartOfSpeech, &f.MeaningTH, &f.Level); err != nil {
 			return nil, fmt.Errorf("failed to scan flashcard row: %w", err)
 		}
 		result = append(result, f)
@@ -284,16 +263,10 @@ func (r *pgRepository) ListFlashcardsForTag(ctx context.Context, tagID int64, us
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("error during row iteration: %w", err)
 	}
-
-	if err := r.attachSentences(ctx, result); err != nil {
-		return nil, err
-	}
-
 	return result, nil
 }
 
 func (r *pgRepository) GetFlashcardByID(ctx context.Context, flashcardID string, userID int64) (FlashcardResponse, error) {
-	// language=SQL
 	const query = `
 		SELECT f.id, v.word, v.part_of_speech, v.meaning_th, v.level, f.image_url, f.created_at
 		FROM flashcards f
@@ -320,11 +293,8 @@ func (r *pgRepository) GetFlashcardByID(ctx context.Context, flashcardID string,
 	return result[0], nil
 }
 
-// attachSentences fills in AISuggestedSentences and Sentences for each
-// flashcard in place, one query per list (simple and fine at this scale).
 func (r *pgRepository) attachSentences(ctx context.Context, cards []FlashcardResponse) error {
 	for i := range cards {
-		// language=SQL
 		aiRows, err := r.pool.Query(ctx, `
 			SELECT sentence_text FROM ai_suggested_sentences
 			WHERE flashcard_id = $1 ORDER BY created_at;
@@ -344,7 +314,6 @@ func (r *pgRepository) attachSentences(ctx context.Context, cards []FlashcardRes
 		aiRows.Close()
 		cards[i].AISuggestedSentences = aiSentences
 
-		// language=SQL
 		sentRows, err := r.pool.Query(ctx, `
 			SELECT id, sentence_text, source, created_at FROM flashcard_sentences
 			WHERE flashcard_id = $1 ORDER BY created_at;
@@ -367,10 +336,7 @@ func (r *pgRepository) attachSentences(ctx context.Context, cards []FlashcardRes
 	return nil
 }
 
-// --- Sentences ---
-
 func (r *pgRepository) AddSentence(ctx context.Context, flashcardID string, userID int64, text string, source string) (SentenceResponse, error) {
-	// language=SQL
 	const query = `
 		INSERT INTO flashcard_sentences (flashcard_id, sentence_text, source)
 		SELECT f.id, $2, $3
@@ -391,9 +357,7 @@ func (r *pgRepository) AddSentence(ctx context.Context, flashcardID string, user
 }
 
 func (r *pgRepository) SaveGeneratedSentences(ctx context.Context, flashcardID string, userID int64, sentences []string) ([]string, error) {
-	// ยืนยันก่อนว่า flashcard นี้เป็นของ user คนนี้จริง ก่อนจะเจนประโยคเพิ่มให้
 	var owned bool
-	// language=SQL
 	err := r.pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM flashcards WHERE id = $1 AND user_id = $2)`, flashcardID, userID).Scan(&owned)
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify flashcard ownership: %w", err)
@@ -404,7 +368,6 @@ func (r *pgRepository) SaveGeneratedSentences(ctx context.Context, flashcardID s
 
 	saved := make([]string, 0, len(sentences))
 	for _, sentence := range sentences {
-		// language=SQL
 		const query = `
 			INSERT INTO ai_suggested_sentences (flashcard_id, sentence_text)
 			VALUES ($1, $2)
@@ -421,7 +384,6 @@ func (r *pgRepository) SaveGeneratedSentences(ctx context.Context, flashcardID s
 }
 
 func (r *pgRepository) DeleteSentence(ctx context.Context, sentenceID int64, userID int64) error {
-	// language=SQL
 	const query = `
 		DELETE FROM flashcard_sentences fs
 		USING flashcards f

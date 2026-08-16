@@ -16,12 +16,9 @@ type service struct {
 
 var ErrVocabAlreadyExists = errors.New("vocabulary already exists")
 
-// NewService creates the flashcard Service.
 func NewService(repo Repository, openaiClient *openai.Client) Service {
 	return &service{repo: repo, openaiClient: openaiClient}
 }
-
-// --- Tags ---
 
 func (s *service) CreateTag(ctx context.Context, userID int64, name string) (TagResponse, error) {
 	tag, err := s.repo.CreateTag(ctx, userID, name)
@@ -42,15 +39,9 @@ func (s *service) ListTags(ctx context.Context, userID int64, limit int) ([]TagR
 	return tags, nil
 }
 
-// --- Flashcards ---
-
-// PreviewFlashcard ถ้า user พิมพ์คำศัพท์เองมาใน word ก็ใช้คำนั้นตรงๆ (AI เติมแค่
-// part_of_speech/meaning_th/level ให้คำที่ยังไม่มีในระบบ) ถ้าไม่ส่ง word มาเลยถึงให้ AI
-// เจนคำศัพท์ใหม่ 1 คำจากชื่อ tag แทน (ไม่เอาคำที่ tag นี้มีอยู่แล้วซ้ำ) แล้วสร้าง flashcard
-// ใหม่ (ประโยคตัวอย่างชุดใหม่เสมอ แม้คำจะซ้ำเดิม — ไม่เจนรูป ใช้ icon แทนฝั่ง frontend)
 func (s *service) PreviewFlashcard(ctx context.Context, tagID int64, userID int64, word string) (*PreviewFlashcardResponse, error) {
 
-	tag, err := s.repo.GetTagByID(ctx, tagID, userID) // เช็คก่อนว่า tag นี้เป็นของ user คนนี้จริง ก่อนจะเจน flashcard เพิ่มให้
+	tag, err := s.repo.GetTagByID(ctx, tagID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +49,7 @@ func (s *service) PreviewFlashcard(ctx context.Context, tagID int64, userID int6
 	word = strings.TrimSpace(word)
 
 	if word != "" {
-		vocab, err := s.resolveUserWord(ctx, word) // ใช้คำที่ user พิมพ์มาเองตรงๆ (เช็คก่อนว่ามีอยู่ในระบบแล้วหรือยัง คำซ้ำจะ error ออกไปเลย)
+		vocab, err := s.resolveUserWord(ctx, word)
 		if err != nil {
 			return nil, err
 		}
@@ -74,7 +65,6 @@ func (s *service) PreviewFlashcard(ctx context.Context, tagID int64, userID int6
 				PartOfSpeech:         vocab.PartOfSpeech,
 				MeaningTH:            vocab.MeaningTH,
 				AISuggestedSentences: sentences,
-				// ID และ CreatedAt ปล่อย zero value ไว้ — ยังไม่มี flashcard จริงจนกว่าจะเรียก save API แยก
 			}},
 		}, nil
 	}
@@ -114,9 +104,6 @@ func (s *service) PreviewFlashcard(ctx context.Context, tagID int64, userID int6
 	return &PreviewFlashcardResponse{Flashcards: flashcards}, nil
 }
 
-// resolveUserWord ใช้คำที่ user พิมพ์เองตรงๆ — เช็คก่อนว่ามีอยู่ในระบบแล้วหรือยัง (ไม่งั้นจะ
-// เจน AI ซ้ำโดยไม่จำเป็น) มีแล้วก็เอา part_of_speech/meaning_th/level เดิมมาใช้เลย ถ้ายังไม่มี
-// ค่อยให้ AI เติมรายละเอียดให้คำนั้น
 func (s *service) resolveUserWord(ctx context.Context, word string) (Vocabulary, error) {
 	_, found, err := s.repo.FindVocabByWord(ctx, word)
 	if err != nil {
@@ -140,10 +127,8 @@ func (s *service) resolveUserWord(ctx context.Context, word string) (Vocabulary,
 	}
 }
 
-// SaveFlashcard บันทึกคำศัพท์ที่ผ่านการ preview มาแล้ว (จาก PreviewFlashcard) ลง DB จริง —
-// upsert คำศัพท์เข้า tag ที่ระบุ แล้วสร้าง flashcard พร้อมประโยคตัวอย่างที่ preview มา
 func (s *service) SaveFlashcard(ctx context.Context, userID int64, req SaveFlashcardRequest) (FlashcardResponse, error) {
-	tag, err := s.repo.GetTagByID(ctx, req.TagID, userID) // เช็คก่อนว่า tag นี้เป็นของ user คนนี้จริง
+	tag, err := s.repo.GetTagByID(ctx, req.TagID, userID)
 	if err != nil {
 		return FlashcardResponse{}, err
 	}
@@ -181,8 +166,6 @@ func (s *service) SaveFlashcard(ctx context.Context, userID int64, req SaveFlash
 	}, nil
 }
 
-// generateVocabFromTag ไม่มี user พิมพ์คำมา ให้ AI เจนคำศัพท์ใหม่ 1 คำจากชื่อ tag เสมอ โดยบอก
-// AI ไม่ให้เจนคำที่ tag นี้มีอยู่แล้วซ้ำ
 func (s *service) generateVocabFromTag(ctx context.Context, tag TagResponse) ([]Vocabulary, error) {
 	existingWords, err := s.repo.ListVocabWordsForTag(ctx, tag.ID)
 	if err != nil {
@@ -197,15 +180,23 @@ func (s *service) generateVocabFromTag(ctx context.Context, tag TagResponse) ([]
 	return s.repo.SaveVocabulariesForTag(ctx, tag.ID, aiResponse.Vocabularies)
 }
 
-func (s *service) ListFlashcards(ctx context.Context, tagID int64, userID int64, level string) ([]FlashcardResponse, error) {
-	return s.repo.ListFlashcardsForTag(ctx, tagID, userID, level)
+func (s *service) ListFlashcards(ctx context.Context, tagID int64, userID int64) (FlashcardsForTagResponse, error) {
+	tag, err := s.repo.GetTagByID(ctx, tagID, userID)
+	if err != nil {
+		return FlashcardsForTagResponse{}, err
+	}
+
+	cards, err := s.repo.ListFlashcardsForTag(ctx, tagID, userID)
+	if err != nil {
+		return FlashcardsForTagResponse{}, err
+	}
+
+	return FlashcardsForTagResponse{TagName: tag.Name, Flashcards: cards}, nil
 }
 
 func (s *service) GetFlashcard(ctx context.Context, flashcardID string, userID int64) (FlashcardResponse, error) {
 	return s.repo.GetFlashcardByID(ctx, flashcardID, userID)
 }
-
-// --- Sentences ---
 
 func (s *service) AddSentence(ctx context.Context, flashcardID string, userID int64, text string) (SentenceResponse, error) {
 	return s.repo.AddSentence(ctx, flashcardID, userID, text, "user")

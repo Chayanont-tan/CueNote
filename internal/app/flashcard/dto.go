@@ -2,8 +2,6 @@ package flashcard
 
 import "time"
 
-// --- Tags ---
-
 type CreateTagRequest struct {
 	Name string `json:"name" binding:"required"`
 }
@@ -16,8 +14,6 @@ type TagResponse struct {
 	TotalWords   int     `json:"total_words"`
 }
 
-// --- Flashcards ---
-
 type GenerateFlashcardsRequest struct {
 	Word string `json:"word"`
 }
@@ -27,6 +23,19 @@ type SentenceResponse struct {
 	SentenceText string    `json:"sentence_text"`
 	Source       string    `json:"source"`
 	CreatedAt    time.Time `json:"created_at"`
+}
+
+type FlashcardsForTagResponse struct {
+	TagName    string            `json:"tag_name"`
+	Flashcards []FlashcardForTag `json:"flashcards"`
+}
+
+type FlashcardForTag struct {
+	ID           string `json:"id"`
+	Word         string `json:"word"`
+	PartOfSpeech string `json:"part_of_speech"`
+	MeaningTH    string `json:"meaning_th"`
+	Level        string `json:"level"`
 }
 
 type FlashcardResponse struct {
@@ -54,8 +63,6 @@ type PreviewFlashcardResponse struct {
 	Flashcards []PreviewFlashcardItem `json:"flashcards"`
 }
 
-// SaveFlashcardRequest คือคำศัพท์ที่ผ่านการ preview มาแล้ว (ทั้งจาก path user พิมพ์เอง
-// และ path AI เจนจาก tag) ให้ frontend ส่งกลับมาตอนกด save จริง
 type SaveFlashcardRequest struct {
 	TagID        int64    `json:"tag_id" binding:"required"`
 	Word         string   `json:"word" binding:"required"`
@@ -64,8 +71,6 @@ type SaveFlashcardRequest struct {
 	Level        string   `json:"level"`
 	Sentences    []string `json:"sentences"`
 }
-
-// --- Sentences ---
 
 type AddSentenceRequest struct {
 	SentenceText string `json:"sentence_text" binding:"required"`

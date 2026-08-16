@@ -30,8 +30,6 @@ func respondNotFoundAware(c *gin.Context, err error) {
 	response.Error(c, http.StatusInternalServerError, err.Error())
 }
 
-// --- Tags ---
-
 func (h *handler) createTag(c *gin.Context) {
 	userID, ok := middleware.UserID(c)
 	if !ok {
@@ -69,8 +67,6 @@ func (h *handler) listTags(c *gin.Context) {
 	}
 	response.Success(c, http.StatusOK, tags)
 }
-
-// --- Flashcards ---
 
 func (h *handler) generateFlashcards(c *gin.Context) {
 	userID, ok := middleware.UserID(c)
@@ -138,9 +134,9 @@ func (h *handler) listFlashcards(c *gin.Context) {
 		return
 	}
 
-	cards, err := h.service.ListFlashcards(c.Request.Context(), tagID, userID, c.Query("level"))
+	cards, err := h.service.ListFlashcards(c.Request.Context(), tagID, userID )
 	if err != nil {
-		response.Error(c, http.StatusInternalServerError, err.Error())
+		respondNotFoundAware(c, err)
 		return
 	}
 	response.Success(c, http.StatusOK, cards)
@@ -160,8 +156,6 @@ func (h *handler) getFlashcard(c *gin.Context) {
 	}
 	response.Success(c, http.StatusOK, card)
 }
-
-// --- Sentences ---
 
 func (h *handler) addSentence(c *gin.Context) {
 	userID, ok := middleware.UserID(c)
