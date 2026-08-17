@@ -268,7 +268,7 @@ func (r *pgRepository) ListFlashcardsForTag(ctx context.Context, tagID int64, us
 
 func (r *pgRepository) GetFlashcardByID(ctx context.Context, flashcardID string, userID int64) (FlashcardResponse, error) {
 	const query = `
-		SELECT f.id, v.word, v.part_of_speech, v.meaning_th, v.level, f.image_url, f.created_at
+		SELECT f.id, v.word, v.part_of_speech, v.meaning_th, v.level, f.created_at
 		FROM flashcards f
 		JOIN vocabularies v ON v.id = f.vocabulary_id
 		WHERE f.id = $1 AND f.user_id = $2;
@@ -276,7 +276,7 @@ func (r *pgRepository) GetFlashcardByID(ctx context.Context, flashcardID string,
 
 	var f FlashcardResponse
 	err := r.pool.QueryRow(ctx, query, flashcardID, userID).Scan(
-		&f.ID, &f.Word, &f.PartOfSpeech, &f.MeaningTH, &f.Level, &f.ImageURL, &f.CreatedAt,
+		&f.ID, &f.Word, &f.PartOfSpeech, &f.MeaningTH, &f.Level, &f.CreatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

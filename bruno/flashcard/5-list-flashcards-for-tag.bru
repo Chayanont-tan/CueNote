@@ -4,10 +4,6 @@ meta {
   seq: 5
 }
 
-docs {
-  Requires {{tagId}} — run "4-generate-flashcards" first.
-}
-
 get {
   url: {{baseUrl}}/tags/{{tagId}}/flashcards
   body: none
@@ -18,14 +14,23 @@ auth:bearer {
   token: {{token}}
 }
 
+vars:pre-request {
+  tagId: 31
+}
+
 tests {
   test("status is 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
-
+  
   test("returns an array of flashcards", function () {
     const body = res.getBody();
     expect(body.success).to.equal(true);
-    expect(body.data).to.be.an("array");
+    expect(body.data.tag_name).to.be.a("string");
+    expect(body.data.flashcards).to.be.an("array");
   });
+}
+
+docs {
+  Requires {{tagId}} — run "4-generate-flashcards" first.
 }

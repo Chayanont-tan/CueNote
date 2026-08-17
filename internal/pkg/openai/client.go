@@ -207,10 +207,10 @@ func (c *Client) GenerateSentences(ctx context.Context, word, meaningTH string) 
 	systemPrompt := `You are an English language learning assistant.
 You MUST respond strictly in valid JSON format matching this structure:
 {
-  "sentences": ["example sentence 1", "example sentence 2", "example sentence 3"]
+  "sentences": ["example sentence 1"]
 }`
 
-	userPrompt := fmt.Sprintf("Generate 3 example sentences using the English word '%s' (Thai meaning: %s).", word, meaningTH)
+	userPrompt := fmt.Sprintf("Generate 1 example sentence using the English word '%s' (Thai meaning: %s).", word, meaningTH)
 
 	req := openaiSDK.ChatCompletionRequest{
 		Model: c.model,

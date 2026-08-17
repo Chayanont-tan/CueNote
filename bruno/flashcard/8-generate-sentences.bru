@@ -1,5 +1,5 @@
 meta {
-  name: Sentences - AI generate 3
+  name: Sentences - AI generate 1
   type: http
   seq: 8
 }
@@ -23,9 +23,9 @@ tests {
     expect(res.getStatus()).to.equal(200);
   });
 
-  test("returns 3 candidate sentences", function () {
+  test("returns 1 candidate sentence", function () {
     const body = res.getBody();
     expect(body.success).to.equal(true);
-    expect(body.data.sentences).to.be.an("array").with.length(3);
+    expect(body.data.sentences).to.be.an("array").with.length(1);
   });
 }

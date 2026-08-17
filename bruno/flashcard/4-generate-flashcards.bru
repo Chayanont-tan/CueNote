@@ -4,11 +4,6 @@ meta {
   seq: 4
 }
 
-docs {
-  Requires {{tagId}} — run "1-create-tag" first.
-  Saves the first created flashcard's id into {{cardId}} for later requests.
-}
-
 post {
   url: {{baseUrl}}/tags/{{tagId}}/flashcards/generate
   body: json
@@ -21,24 +16,12 @@ auth:bearer {
 
 body:json {
   {
-    "limit": 3
+    "limit": 1
   }
 }
 
-tests {
-  test("status is 201", function () {
-    expect(res.getStatus()).to.equal(201);
-  });
-
-  test("returns flashcards with image + ai sentences", function () {
-    const body = res.getBody();
-    expect(body.success).to.equal(true);
-    expect(body.data.flashcards).to.be.an("array").with.length.greaterThan(0);
-    body.data.flashcards.forEach((f) => {
-      expect(f.image_url).to.be.a("string").and.not.empty;
-      expect(f.ai_suggested_sentences).to.be.an("array");
-    });
-  });
+vars:pre-request {
+  tagId: 35
 }
 
 script:post-response {
@@ -48,4 +31,25 @@ script:post-response {
       bru.setVar("cardId", cards[0].id);
     }
   }
+}
+
+tests {
+  test("status is 201", function () {
+    expect(res.getStatus()).to.equal(201);
+  });
+  
+  test("returns flashcards with ai sentences", function () {
+    const body = res.getBody();
+    expect(body.success).to.equal(true);
+    expect(body.data.flashcards).to.be.an("array").with.length.greaterThan(0);
+    body.data.flashcards.forEach((f) => {
+      expect(f.image_url).to.be.undefined;
+      expect(f.ai_suggested_sentences).to.be.an("array").with.length(1);
+    });
+  });
+}
+
+docs {
+  Requires {{tagId}} — run "1-create-tag" first.
+  Saves the first created flashcard's id into {{cardId}} for later requests.
 }

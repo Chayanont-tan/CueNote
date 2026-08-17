@@ -60,44 +60,43 @@ func (s *service) PreviewFlashcard(ctx context.Context, tagID int64, userID int6
 		}
 
 		return &PreviewFlashcardResponse{
-			Flashcards: []PreviewFlashcardItem{{
-				Word:                 vocab.Word,
-				PartOfSpeech:         vocab.PartOfSpeech,
-				MeaningTH:            vocab.MeaningTH,
+			Flashcards: []FlashcardResponse{{
+				FlashcardBase: FlashcardBase{
+					Word:         vocab.Word,
+					PartOfSpeech: vocab.PartOfSpeech,
+					MeaningTH:    vocab.MeaningTH,
+					Level:        vocab.Level,
+				},
 				AISuggestedSentences: sentences,
 			}},
 		}, nil
 	}
 
-	items, err := s.generateVocabFromTag(ctx, tag)
+	existingWords, err := s.repo.ListVocabWordsForTag(ctx, tag.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	flashcards := make([]PreviewFlashcardItem, 0, len(items))
-	for _, item := range items {
+	aiResponse, err := s.openaiClient.GenerateVocabulariesByTag(ctx, tag.Name, 1, existingWords)
+	if err != nil {
+		return nil, err
+	}
+
+	flashcards := make([]FlashcardResponse, 0, len(aiResponse.Vocabularies))
+	for _, item := range aiResponse.Vocabularies {
 		sentences, err := s.openaiClient.GenerateSentences(ctx, item.Word, item.MeaningTH)
 		if err != nil {
 			return nil, err
 		}
 
-		fc, savedSentences, err := s.repo.CreateFlashcardWithSentences(ctx, userID, item.ID, "", sentences)
-		if err != nil {
-			return nil, err
-		}
-
-		aiSentences := make([]string, 0, len(savedSentences))
-		for _, saved := range savedSentences {
-			aiSentences = append(aiSentences, saved.SentenceText)
-		}
-
-		flashcards = append(flashcards, PreviewFlashcardItem{
-			ID:                   fc.ID,
-			Word:                 item.Word,
-			PartOfSpeech:         item.PartOfSpeech,
-			MeaningTH:            item.MeaningTH,
-			AISuggestedSentences: aiSentences,
-			CreatedAt:            fc.CreatedAt,
+		flashcards = append(flashcards, FlashcardResponse{
+			FlashcardBase: FlashcardBase{
+				Word:         item.Word,
+				PartOfSpeech: item.PartOfSpeech,
+				MeaningTH:    item.MeaningTH,
+				Level:        item.Level,
+			},
+			AISuggestedSentences: sentences,
 		})
 	}
 
@@ -155,29 +154,16 @@ func (s *service) SaveFlashcard(ctx context.Context, userID int64, req SaveFlash
 	}
 
 	return FlashcardResponse{
-		ID:                   fc.ID,
-		Word:                 vocab.Word,
-		PartOfSpeech:         vocab.PartOfSpeech,
-		MeaningTH:            vocab.MeaningTH,
-		Level:                vocab.Level,
-		ImageURL:             fc.ImageURL,
+		ID: fc.ID,
+		FlashcardBase: FlashcardBase{
+			Word:         vocab.Word,
+			PartOfSpeech: vocab.PartOfSpeech,
+			MeaningTH:    vocab.MeaningTH,
+			Level:        vocab.Level,
+		},
 		AISuggestedSentences: aiSentences,
 		CreatedAt:            fc.CreatedAt,
 	}, nil
-}
-
-func (s *service) generateVocabFromTag(ctx context.Context, tag TagResponse) ([]Vocabulary, error) {
-	existingWords, err := s.repo.ListVocabWordsForTag(ctx, tag.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	aiResponse, err := s.openaiClient.GenerateVocabulariesByTag(ctx, tag.Name, 1, existingWords)
-	if err != nil {
-		return nil, err
-	}
-
-	return s.repo.SaveVocabulariesForTag(ctx, tag.ID, aiResponse.Vocabularies)
 }
 
 func (s *service) ListFlashcards(ctx context.Context, tagID int64, userID int64) (FlashcardsForTagResponse, error) {
