@@ -1,6 +1,7 @@
 package openai
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -14,18 +15,31 @@ import (
 type Client struct {
 	apiKey     string
 	model      string
+	sttModel   string
 	mockImages bool
 	sdk        *openaiSDK.Client
 }
 
-func (c *Client) TranscribeAudio(ctx context.Context, data []byte) (string, error) {
-	panic("unimplemented")
+// TranscribeAudio sends raw audio bytes to the configured speech-to-text
+// model and returns the transcribed text. The audio is streamed straight
+// from memory — nothing is written to disk.
+func (c *Client) TranscribeAudio(ctx context.Context, filename string, data []byte) (string, error) {
+	resp, err := c.sdk.CreateTranscription(ctx, openaiSDK.AudioRequest{
+		Model:    c.sttModel,
+		Reader:   bytes.NewReader(data),
+		FilePath: filename,
+		Format:   openaiSDK.AudioResponseFormatText,
+	})
+	if err != nil {
+		return "", fmt.Errorf("ai transcription failed: %w", err)
+	}
+	return resp.Text, nil
 }
 
 // New creates a new LLM client supporting both OpenAI and Groq (via baseURL).
 // mockImages, when true, makes GenerateImage return a placeholder URL instead
 // of calling the (paid) DALL-E endpoint.
-func New(apiKey, baseURL, model string, mockImages bool) *Client {
+func New(apiKey, baseURL, model, sttModel string, mockImages bool) *Client {
 	config := openaiSDK.DefaultConfig(apiKey)
 
 	// ถ้ามีการระบุ BaseURL (เช่น Groq: https://api.groq.com/openai/v1) ให้ override เข้าไป
@@ -39,9 +53,15 @@ func New(apiKey, baseURL, model string, mockImages bool) *Client {
 		selectedModel = openaiSDK.GPT4oMini
 	}
 
+	selectedSTTModel := sttModel
+	if selectedSTTModel == "" {
+		selectedSTTModel = openaiSDK.Whisper1
+	}
+
 	return &Client{
 		apiKey:     apiKey,
 		model:      selectedModel,
+		sttModel:   selectedSTTModel,
 		mockImages: mockImages,
 		sdk:        openaiSDK.NewClientWithConfig(config),
 	}

@@ -18,10 +18,11 @@ type Config struct {
 	StorageAccessKey string
 	StorageSecretKey string
 
-	OpenAIAPIKey  string
-	OpenAIBaseURL string
-	OpenAIModel   string
-	AIMockImages  bool
+	OpenAIAPIKey   string
+	OpenAIBaseURL  string
+	OpenAIModel    string
+	OpenAISTTModel string
+	AIMockImages   bool
 
 	JWTSecret string
 }
@@ -41,10 +42,11 @@ func Load() (*Config, error) {
 		StorageAccessKey: getEnv("STORAGE_ACCESS_KEY", ""),
 		StorageSecretKey: getEnv("STORAGE_SECRET_KEY", ""),
 
-		OpenAIAPIKey:  getEnv("OPENAI_API_KEY", ""),
-		OpenAIBaseURL: getEnv("OPENAI_BASE_URL", ""),
-		OpenAIModel:   getEnv("OPENAI_MODEL", "llama-3.3-70b-versatile"),
-		AIMockImages:  getEnv("AI_MOCK_IMAGES", "true") == "true",
+		OpenAIAPIKey:   getEnv("OPENAI_API_KEY", ""),
+		OpenAIBaseURL:  getEnv("OPENAI_BASE_URL", ""),
+		OpenAIModel:    getEnv("OPENAI_MODEL", "llama-3.3-70b-versatile"),
+		OpenAISTTModel: getEnv("OPENAI_STT_MODEL", "whisper-large-v3"),
+		AIMockImages:   getEnv("AI_MOCK_IMAGES", "true") == "true",
 
 		JWTSecret: getEnv("JWT_SECRET", "dev-insecure-secret-change-me"),
 	}

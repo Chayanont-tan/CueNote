@@ -1,0 +1,32 @@
+meta {
+  name: Shadowing - get sentence
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/shadowing/sentences/{{sentenceId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  Requires {{sentenceId}} — run "flashcard/7-add-sentence" first to create one.
+  Returns the flashcard sentence belonging to the logged-in user.
+}
+
+tests {
+  test("status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns the sentence", function () {
+    const body = res.getBody();
+    expect(body.success).to.equal(true);
+    expect(body.data).to.have.property("text");
+  });
+}

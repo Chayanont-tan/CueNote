@@ -1,12 +1,12 @@
 # Database Architecture & Schema Specification
 ## Target Database: PostgreSQL (ปัจจุบันรันบน Docker container `cuenote-postgres`, DB name `mission_note`)
 
-> **สถานะ:** อัปเดต 2026-07-27 — ตอนนี้ backend ครอบคลุมเฉพาะฟีเจอร์ **Flashcard**
-> (tags + vocabulary catalog + flashcards + sentences) ซึ่งเป็นฟีเจอร์เดียวที่มี
-> DB จริงและทำงานจบ flow ในตอนนี้ โค้ดฝั่งนี้รวมอยู่ใน **Go module เดียว**
-> `internal/app/flashcard` (โมดูล `vocabulary` เดิมถูกลบทิ้งแล้ว ยุบรวมเข้ามาเป็น
-> โค้ดภายในของ `flashcard`) — ดู `structure.md` ฟีเจอร์ Shadowing ยังไม่มีตาราง
-> DB เลย (ดูหัวข้อ "ฟีเจอร์ที่ยังไม่มี DB" ด้านล่าง) ส่วน Workspace (Photo Flip
+> **สถานะ:** อัปเดต 2026-08-21 — backend ครอบคลุมฟีเจอร์ **Flashcard**
+> (tags + vocabulary catalog + flashcards + sentences) และตอนนี้ **Shadowing**
+> (Design A: pronunciation score, migration `000009` เพิ่มตาราง `shadowing_attempts`
+> — ดูหัวข้อ "Shadowing (Design A)" ด้านล่าง) โค้ด Flashcard รวมอยู่ใน **Go module
+> เดียว** `internal/app/flashcard` (โมดูล `vocabulary` เดิมถูกลบทิ้งแล้ว ยุบรวมเข้ามาเป็น
+> โค้ดภายในของ `flashcard`) — ดู `structure.md` ส่วน Workspace (Photo Flip
 > Card) ถูกตัดออกจาก scope แล้วและลบโมดูลทิ้งไปแล้ว
 
 ---
@@ -153,14 +153,28 @@ users 1───* flashcards *───1 vocabularies *───* tags
 
 ---
 
-## 🚧 ฟีเจอร์ที่ยังไม่มี DB (Not Yet Implemented)
+## ✅ Shadowing (Design A) — Implemented (migration `000009`)
 
-โมดูล Go `internal/app/shadowing` มีโครง service/repository/handler ครบแล้ว (ดู `structure.md`) แต่**ยังไม่มีตารางใน DB เลยสักตารางเดียว** เพราะยังไม่ได้ตัดสินใจดีไซน์:
+เลือกแนวทาง (A) audio pronunciation scoring แล้ว (ดู `product.md` Feature 3) แนวทาง (B) scenario-based Read-Along chat ยังไม่ implement และไม่มีตาราง DB (out of scope งานนี้)
 
-- **Shadowing** — ต้องตัดสินใจก่อนว่าจะ implement ตามดีไซน์ไหน (ดู `product.md` และ `cue-note-mvp-spec.md` ซึ่งมี 2 แนวทางต่างกัน — ต้องเลือกก่อนจะออกแบบตารางได้):
-  1. แนวทางเดิม (audio pronunciation scoring, มี `shadowing_sessions` เก็บคะแนน/word_analysis)
-  2. แนวทางใหม่ (scenario-based Read-Along chat ปลดล็อกด้วยจำนวนคำศัพท์ในแต่ละ Tag ตาม UI mockup ล่าสุด) — ต้องการตารางประมาณ `shadowing_scenarios` (tag_id, scenario_number, script JSON/ตารางแยกบรรทัด, created_at) เป็นอย่างน้อย
+Shadowing **ไม่มีตาราง sentence แยกของตัวเอง** — ใช้ `flashcard_sentences` ที่มีอยู่แล้วเป็นเนื้อหาให้ user อ่าน (ownership เช็คผ่าน join `flashcard_sentences.flashcard_id -> flashcards.user_id`) มีแค่ตารางใหม่ตารางเดียว:
 
-**ต้องคุยกับทีมก่อนว่าจะไปทางไหน ก่อนเริ่ม implement backend ของ Shadowing ต่อ**
+```sql
+-- =============================================================================
+-- shadowing_attempts — ผลการอ่านตามของ user แต่ละครั้ง (ไม่เก็บไฟล์เสียง)
+-- =============================================================================
+CREATE TABLE shadowing_attempts (
+    id                    BIGSERIAL PRIMARY KEY,
+    user_id               BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    flashcard_sentence_id BIGINT NOT NULL REFERENCES flashcard_sentences(id) ON DELETE CASCADE,
+    transcript            TEXT NOT NULL,          -- ข้อความที่ได้จาก Whisper
+    score                 INT NOT NULL,           -- 0-100, จาก word-level LCS diff
+    correct_words         JSONB NOT NULL DEFAULT '[]',
+    mispronounced_words   JSONB NOT NULL DEFAULT '[]',
+    created_at            TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+ไฟล์เสียงที่ user อัปโหลดจะถูกอ่านเข้า memory ส่งไป transcribe แล้วทิ้งทันที — ไม่มีคอลัมน์ `audio_url` และไม่ใช้ `internal/infra/storage` (ยังเป็น stub เหมือนเดิม ไม่มีอะไรอ้างอิงถึงแล้ว)
 
 (Workspace เคยอยู่ในหัวข้อนี้ด้วย แต่ถูกตัดออกจาก scope และลบโมดูลทิ้งแล้ว — ดู `product.md` Feature 2)

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"mission-note/internal/core/middleware"
 	"mission-note/internal/core/response"
 	"mission-note/internal/core/validation"
 )
@@ -19,13 +20,19 @@ func newHandler(service Service) *handler {
 }
 
 func (h *handler) getSentence(c *gin.Context) {
+	userID, ok := middleware.UserID(c)
+	if !ok {
+		response.Error(c, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid sentence id")
 		return
 	}
 
-	sentence, err := h.service.GetSentence(c.Request.Context(), id)
+	sentence, err := h.service.GetSentence(c.Request.Context(), userID, id)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
@@ -35,13 +42,19 @@ func (h *handler) getSentence(c *gin.Context) {
 }
 
 func (h *handler) submitAttempt(c *gin.Context) {
+	userID, ok := middleware.UserID(c)
+	if !ok {
+		response.Error(c, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
 	var req SubmitAttemptRequest
 	if err := c.ShouldBind(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, validation.BindErrorMessage(err))
 		return
 	}
 
-	score, err := h.service.SubmitAttempt(c.Request.Context(), req)
+	score, err := h.service.SubmitAttempt(c.Request.Context(), userID, req)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return

@@ -1,0 +1,40 @@
+meta {
+  name: Shadowing - submit attempt
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/shadowing/attempts
+  body: multipartForm
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:multipart-form {
+  sentence_id: {{sentenceId}}
+  audio: @file(./sample.wav)
+}
+
+docs {
+  Requires {{sentenceId}} — run "1-get-sentence" first.
+  Replace sample.wav with a short recording of you reading that sentence
+  out loud. The audio is transcribed and discarded — it is never stored.
+}
+
+tests {
+  test("status is 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("returns a score", function () {
+    const body = res.getBody();
+    expect(body.success).to.equal(true);
+    expect(body.data).to.have.property("score");
+    expect(body.data.correct_words).to.be.an("array");
+    expect(body.data.mispronounced_words).to.be.an("array");
+  });
+}

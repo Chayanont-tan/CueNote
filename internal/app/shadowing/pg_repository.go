@@ -15,28 +15,28 @@ func NewPgRepository(pool *pgxpool.Pool) Repository {
 	return &pgRepository{pool: pool}
 }
 
-func (r *pgRepository) FindSentenceByID(ctx context.Context, id int64) (Sentence, error) {
+func (r *pgRepository) FindSentenceForUser(ctx context.Context, sentenceID, userID int64) (SentenceRef, error) {
 	const query = `
-		SELECT id, text, audio_url, timestamps, created_at
-		FROM shadowing_sentences
-		WHERE id = $1`
+		SELECT fs.id, fs.sentence_text
+		FROM flashcard_sentences fs
+		JOIN flashcards f ON f.id = fs.flashcard_id
+		WHERE fs.id = $1 AND f.user_id = $2`
 
-	var s Sentence
-	err := r.pool.QueryRow(ctx, query, id).
-		Scan(&s.ID, &s.Text, &s.AudioURL, &s.Timestamps, &s.CreatedAt)
+	var s SentenceRef
+	err := r.pool.QueryRow(ctx, query, sentenceID, userID).Scan(&s.ID, &s.Text)
 	if err != nil {
-		return Sentence{}, err
+		return SentenceRef{}, err
 	}
 	return s, nil
 }
 
 func (r *pgRepository) SaveAttempt(ctx context.Context, a Attempt) (Attempt, error) {
 	const query = `
-		INSERT INTO shadowing_attempts (user_id, sentence_id, audio_url, score)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO shadowing_attempts (user_id, flashcard_sentence_id, transcript, score, correct_words, mispronounced_words)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at`
 
-	err := r.pool.QueryRow(ctx, query, a.UserID, a.SentenceID, a.AudioURL, a.Score).
+	err := r.pool.QueryRow(ctx, query, a.UserID, a.SentenceID, a.Transcript, a.Score, a.CorrectWords, a.MispronouncedWords).
 		Scan(&a.ID, &a.CreatedAt)
 	if err != nil {
 		return Attempt{}, err

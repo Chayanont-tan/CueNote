@@ -16,7 +16,6 @@ import (
 	"mission-note/internal/core/ratelimiting"
 	"mission-note/internal/core/validation"
 	"mission-note/internal/infra/db"
-	"mission-note/internal/infra/storage"
 	"mission-note/internal/pkg/openai"
 )
 
@@ -68,14 +67,7 @@ func Init(ctx context.Context) (*App, error) {
 		return nil, err
 	}
 
-	storageClient := storage.New(storage.Config{
-		Endpoint:  cfg.StorageEndpoint,
-		Bucket:    cfg.StorageBucket,
-		AccessKey: cfg.StorageAccessKey,
-		SecretKey: cfg.StorageSecretKey,
-	})
-
-	aiClient := openai.New(cfg.OpenAIAPIKey, cfg.OpenAIBaseURL, cfg.OpenAIModel, cfg.AIMockImages)
+	aiClient := openai.New(cfg.OpenAIAPIKey, cfg.OpenAIBaseURL, cfg.OpenAIModel, cfg.OpenAISTTModel, cfg.AIMockImages)
 
 	// =========================================================================
 	// 1. GLOBAL MIDDLEWARES (ส่วนการตั้งค่าความปลอดภัยระดับระบบ)
@@ -108,7 +100,7 @@ func Init(ctx context.Context) (*App, error) {
 
 	// โมดูลการเรียนรู้ (ต้องยืนยันตัวตนก่อนเพื่อดึง/บันทึกข้อมูลเฉพาะบุคคล)
 	flashcard.RegisterModule(protected, pool, aiClient)
-	shadowing.RegisterModule(protected, pool, storageClient, aiClient)
+	shadowing.RegisterModule(protected, pool, aiClient)
 
 	app := &App{
 		Router: router,

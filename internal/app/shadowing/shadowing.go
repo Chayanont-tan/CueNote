@@ -5,15 +5,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"mission-note/internal/infra/storage"
 	"mission-note/internal/pkg/openai"
 )
 
 // RegisterModule wires the repository, service and handler together and
 // registers the shadowing feature's routes on the given router group.
-func RegisterModule(rg *gin.RouterGroup, pool *pgxpool.Pool, storageClient storage.Storage, aiClient *openai.Client) {
+func RegisterModule(rg *gin.RouterGroup, pool *pgxpool.Pool, aiClient *openai.Client) {
 	repo := NewPgRepository(pool)
-	svc := NewService(repo, storageClient, aiClient)
+	svc := NewService(repo, aiClient)
 	h := newHandler(svc)
 
 	sentences := rg.Group("/shadowing")

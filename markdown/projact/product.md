@@ -30,17 +30,17 @@
 ### Feature 2: Photo Block & Voice-to-Text Flip Card Workspace — ❌ Removed (2026-07-27)
 เดิมมีโครง Go module (`internal/app/workspace`) สแกฟโฟลด์ไว้แต่ไม่เคยมีตาราง DB รองรับเลย และ storage client ก็ยังเป็น stub — ตัดสินใจแล้วว่าไม่อยู่ใน scope ต่อไป (ดีไซน์ UI ล่าสุดใน `cue-note-mvp-spec.md` ไม่ได้พูดถึง Photo Flip Card เลย เน้น Tag→Vocab→Sentence→Shadowing แทน) **ลบโมดูลทิ้งแล้ว** ถ้าจะกลับมาทำฟีเจอร์นี้ในอนาคตต้องออกแบบ/เขียนใหม่ทั้งหมด
 
-### Feature 3: Shadowing — 📝 Two competing designs, need a decision before implementing
-มีเอกสารดีไซน์ 2 ชุดที่ไม่ตรงกัน ต้องเลือกก่อนเริ่ม implement backend:
+### Feature 3: Shadowing — ✅ Design (A) chosen, backend implemented (2026-08-21)
+เดิมมีเอกสารดีไซน์ 2 ชุดที่ไม่ตรงกัน **ตอนนี้ตัดสินใจแล้วว่าทำ (A)** — Design (B) ("Scenario-based Read-Along Chat" ตาม `cue-note-mvp-spec.md`/`web-test/app-flow-mockup.html`, ไม่มีการอัดเสียง/ให้คะแนน) อยู่นอก scope ของงานนี้ ถ้าจะทำต่อในอนาคตต้องออกแบบ/implement แยกเป็นอีก endpoint
 
-**(A) แนวทางเดิม — Pronunciation Score แบบ Spotify Lyrics**
-* **สถานะ:** มีโครง Go module (`internal/app/shadowing`) กับ route `GET /shadowing/sentences/:id`, `POST /shadowing/attempts` แล้ว แต่คะแนนถูก hardcode เป็น `0`, ยังไม่มีตาราง DB, ยังไม่ต่อ TTS/Whisper จริง
-* **UX/UI Concept:** ระบบแสดงผลประโยคที่ถูกต้องในรูปแบบเนื้อร้องคาราโอเกะ (Spotify Lyrics) โดยจะมี AI กดอ่านออกเสียงประโยคนั้นให้ฟัง และตัวหนังสือบนหน้าจอจะไฮไลต์วิ่งตามทีละคำตามจังหวะเสียงพูดจริง จากนั้นผู้ใช้กดปุ่มอัดเสียงเพื่อทำ Shadowing (พูดตาม) เมื่อพูดจบระบบจะแสดงการคำนวณคะแนนความถูกต้อง (0-100) พร้อมไฮไลต์คำที่ออกเสียงชัดเป็น **สีเขียว** และคำที่ออกเสียงเพี้ยนเป็น **สีแดง**
-* **Data Flow:** หน้าบ้านใช้ข้อมูลคำและตำแหน่งเวลา (Timestamps) ในการขยับไฮไลต์ตัวหนังสือตามไฟล์เสียง AI -> เมื่อผู้ใช้อัดเสียง Shadowing เสร็จ ระบบส่งไฟล์เสียงไปแปลงเป็นข้อความและทำ Diff Match เปรียบเทียบกับต้นฉบับเพื่อคิดคะแนนส่งกลับมาโชว์ที่หน้าบ้าน
+**(A) Pronunciation Score แบบ Spotify Lyrics — Implemented (backend API เท่านั้น, ยังไม่มี client)**
+* **สถานะ:** `internal/app/shadowing` implement ครบแล้ว — route `GET /shadowing/sentences/:id`, `POST /shadowing/attempts`, ตาราง `shadowing_attempts` (migration `000009`), คำนวณคะแนนจริงด้วย word-level LCS diff (ดู `internal/app/shadowing/score.go`) แทนที่จะ hardcode `0`
+* **MVP scope ที่ตัดออกไปก่อน:** ยังไม่มี TTS (AI อ่านออกเสียง) และยังไม่มีการไฮไลต์คาราโอเกะระหว่างเล่นเสียงต้นฉบับ — ตอนนี้ flow คือ user เลือกประโยค (ข้อความล้วน) มาอ่าน อัดเสียงส่งเข้ามา แล้วได้คะแนนกลับ ไม่มีการเล่นเสียงต้นฉบับให้ฟังก่อน
+* **ไม่เก็บไฟล์เสียงถาวร:** ไฟล์เสียงที่ user อัปโหลดจะถูกอ่านเข้า memory ส่งไป transcribe (Whisper ผ่าน `internal/pkg/openai.Client`, ใช้ Groq's `whisper-large-v3` เป็นค่า default) แล้วทิ้งทันที ไม่มีการอัปโหลดเก็บที่ storage ใดๆ (ตัด `internal/infra/storage` dependency ออกจากฟีเจอร์นี้แล้ว)
+* **เนื้อหาที่ให้อ่าน (sentence content):** ใช้ประโยคที่ user เขียน/เลือกไว้ในฟีเจอร์ flashcard อยู่แล้ว (`flashcard_sentences`) แทนที่จะสร้างตาราง sentence แยกใหม่ — ownership ตรวจผ่าน join กับ `flashcards.user_id`
+* **Data Flow:** ผู้ใช้อ่านประโยคจาก flashcard ของตัวเอง -> อัดเสียง -> ส่งไฟล์เสียงไปแปลงเป็นข้อความ (Whisper) -> ทำ word-level diff เปรียบเทียบกับต้นฉบับเพื่อคิดคะแนน (0-100) พร้อมรายการคำที่ถูก/คำที่ออกเสียงผิด -> บันทึกผลลง `shadowing_attempts` (ไม่บันทึกไฟล์เสียง) -> ส่งคะแนนกลับ
 
-**(B) แนวทางใหม่ — Scenario-based Read-Along Chat** (ตาม `cue-note-mvp-spec.md` และ UI mockup ล่าสุด `web-test/app-flow-mockup.html`)
+**(B) Scenario-based Read-Along Chat — Out of scope (ยังไม่ implement)**
 * **สถานะ:** มีแค่ UI mockup (คลิกดูได้จริง ไม่มี backend) ยังไม่มีตาราง DB เลย
 * **UX/UI Concept:** ไม่มีการอัดเสียง/ให้คะแนนการออกเสียง — แทนที่ด้วยบทสนทนาสถานการณ์ (Scenario) แบบ Chat ที่ปลดล็อกทีละสถานการณ์ตามจำนวนคำศัพท์สะสมใน Tag นั้นๆ (5/10/15 คำ) ผู้ใช้กด "สร้างสถานการณ์" ให้ AI เจนบทสนทนาจากคำศัพท์ + ประโยคที่เคยแต่งเอง แล้วกด Play ให้ไฮไลต์วิ่งตามทีละบทพร้อม auto-scroll (ไม่มีการประเมินการออกเสียง)
 * **Data Flow (ยังไม่ implement):** ต้องมีตารางเก็บ scenario ต่อ tag (เช่น `shadowing_scenarios`: tag_id, scenario_number, สถานะ created/locked) และตารางเก็บบทสนทนาแต่ละบรรทัด (เช่น `shadowing_dialogue_lines`: scenario_id, speaker, text_en, text_th, order)
-
-**⚠️ ต้องตัดสินใจก่อน implement:** จะทำ (A), (B), หรือทำทั้งคู่แบบคนละ endpoint? การเลือกกระทบ DB schema และ effort ต่างกันมาก — (A) ต้องมี audio pipeline (Whisper transcription + diff scoring + TTS), (B) ไม่ต้องจัดการเสียงเลย เน้น content generation + unlock logic เท่านั้น
