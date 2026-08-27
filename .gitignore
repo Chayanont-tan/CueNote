@@ -1,7 +1,23 @@
+# Environment variables & secrets
 .env
-.env.local
+.env.*
+!.env.example
+
+# IDE & Editor configs
 .vscode/
 
-app-flow-mockup-web.html
-app-flow-mockup.html
-mobile-test.html
+# Local test & notes folders
+sql_learn/
+.sql_learn/
+.web-test/
+.mock/
+.markdown/
+
+# OS / Build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+dist/
+bin/

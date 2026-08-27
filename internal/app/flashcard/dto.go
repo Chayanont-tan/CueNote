@@ -61,7 +61,7 @@ type AddSentenceRequest struct {
 type FlashcardResponse struct {
 	ID string `json:"id"`
 	FlashcardBase
-	AISuggestedSentences []string            `json:"ai_suggested_sentences"`
+	AISuggestedSentences []string           `json:"ai_suggested_sentences"`
 	Sentences            []SentenceResponse `json:"sentences"`
 	CreatedAt            time.Time          `json:"created_at"`
 }

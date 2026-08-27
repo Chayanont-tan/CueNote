@@ -1,0 +1,10 @@
+.git
+.env
+.env.local
+bruno/
+web-test/
+sql_learn/
+markdown/
+mock/
+tmp/
+*.md
